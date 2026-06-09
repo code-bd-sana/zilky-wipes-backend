@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "Production-ready Node.js, Express, TypeScript, PostgreSQL, and Prisma boilerplate.",
   "main": "dist/server.js",
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
+
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
@@ -18,7 +16,8 @@
     "prisma:migrate": "prisma migrate dev --schema=./prisma/schema.prisma",
     "prisma:deploy": "prisma migrate deploy --schema=./prisma/schema.prisma",
     "prisma:studio": "prisma studio --schema=./prisma/schema.prisma",
-    "prisma:format": "prisma format --schema=./prisma/schema.prisma"
+    "prisma:format": "prisma format --schema=./prisma/schema.prisma",
+    "prisma:seed": "tsx prisma/seed.ts"
   },
   "keywords": [],
   "author": "",

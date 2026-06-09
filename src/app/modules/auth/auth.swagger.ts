@@ -7,9 +7,9 @@ import { createErrorResponse, createSuccessResponse, Error400, Error401, Error40
 export const registerAuthSwagger = (registry: OpenAPIRegistry, bearerAuth: any) => {
   const UserResponseSchema = z.object({
     id: z.string().openapi({ example: 'uuid-1234' }),
-    name: z.string().openapi({ example: 'John Doe' }),
-    email: z.string().openapi({ example: 'john@example.com' }),
-    role: z.string().openapi({ example: 'USER' })
+    name: z.string().openapi({ example: 'Admin' }),
+    email: z.string().openapi({ example: 'admin@gmail.com' }),
+    role: z.string().openapi({ example: 'ADMIN' })
   });
 
   registry.registerPath({
