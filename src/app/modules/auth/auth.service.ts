@@ -22,7 +22,7 @@ type UserRecord = {
   id: string;
   name: string;
   email: string;
-  role: 'USER' | 'MANAGER' | 'ADMIN';
+  role: 'USER' | 'ADMIN';
 };
 
 const sanitizeUser = (user: UserRecord): IUserResponse => ({

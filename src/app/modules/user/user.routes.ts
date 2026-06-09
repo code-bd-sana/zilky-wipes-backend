@@ -7,8 +7,8 @@ import { UserValidation } from './user.validation';
 
 const router = Router();
 
-router.get('/me', auth('USER', 'MANAGER', 'ADMIN'), UserController.getMe);
-router.get('/', auth('ADMIN', 'MANAGER'), UserController.getAllUsers);
+router.get('/me', auth('USER', 'ADMIN'), UserController.getMe);
+router.get('/', auth('ADMIN'), UserController.getAllUsers);
 router.patch(
   '/:id/role',
   auth('ADMIN'),
