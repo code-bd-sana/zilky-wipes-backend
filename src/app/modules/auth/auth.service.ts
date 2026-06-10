@@ -20,41 +20,52 @@ import type {
 
 type UserRecord = {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  username: string;
   email: string;
   role: 'USER' | 'ADMIN';
 };
 
 const sanitizeUser = (user: UserRecord): IUserResponse => ({
   id: user.id,
-  name: user.name,
+  firstName: user.firstName,
+  lastName: user.lastName,
+  username: user.username,
   email: user.email,
   role: user.role
 });
 
 const register = async (payload: IUserRegisterPayload): Promise<IUserResponse> => {
-  const existingUser = await prisma.user.findUnique({
+  const existingUser = await prisma.user.findFirst({
     where: {
-      email: payload.email
+      OR: [
+        { email: payload.email },
+        { username: payload.username }
+      ]
     }
   });
 
   if (existingUser) {
-    throw new AppError(409, 'A user with this email already exists.');
+    throw new AppError(409, 'A user with this email or username already exists.');
   }
 
   const hashedPassword = await bcrypt.hash(payload.password, config.bcryptSaltRounds);
 
   const user = await prisma.user.create({
     data: {
-      name: payload.name,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
+      username: payload.username,
       email: payload.email,
       password: hashedPassword,
       role: payload.role ?? 'USER'
     },
     select: {
       id: true,
-      name: true,
+      firstName: true,
+      lastName: true,
+      username: true,
       email: true,
       role: true
     }
