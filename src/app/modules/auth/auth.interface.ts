@@ -1,7 +1,9 @@
 import type { UserRole } from '../../interfaces/auth.interface';
 
 export interface IUserRegisterPayload {
-  name: string;
+  firstName: string;
+  lastName: string;
+  username: string;
   email: string;
   password: string;
   role?: 'USER';
@@ -14,7 +16,9 @@ export interface IUserLoginPayload {
 
 export interface IUserResponse {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  username: string;
   email: string;
   role: UserRole;
 }
