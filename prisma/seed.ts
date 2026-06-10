@@ -17,13 +17,17 @@ async function main() {
     update: {
       password: hashedPassword,
       role: 'ADMIN',
-      name: 'System Admin'
+      username: adminEmail,
+      firstName: 'System',
+      lastName: 'Admin'
     },
     create: {
       email: adminEmail,
       password: hashedPassword,
       role: 'ADMIN',
-      name: 'System Admin'
+      username: adminEmail,
+      firstName: 'System',
+      lastName: 'Admin'
     }
   });
 
