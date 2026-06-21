@@ -26,3 +26,28 @@ enum Role {
   USER
   ADMIN
 }
+
+model Page {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  title       String
+  description String?
+  sections    Section[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("pages")
+}
+
+model Section {
+  id         String   @id @default(uuid())
+  pageId     String
+  page       Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  sectionKey String
+  content    Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([pageId, sectionKey])
+  @@map("sections")
+}
