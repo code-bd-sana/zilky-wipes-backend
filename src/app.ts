@@ -22,7 +22,9 @@ const corsOptions: CorsOptions = {
   credentials: true
 };
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json({ limit: '1mb' }));
@@ -58,6 +60,7 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
+app.use('/uploads', express.static('uploads'));
 app.use('/api/v1', router);
 app.use(notFound);
 app.use(globalErrorHandler);
