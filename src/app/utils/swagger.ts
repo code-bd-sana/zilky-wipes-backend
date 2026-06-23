@@ -3,6 +3,8 @@ import { z } from 'zod';
 
 import { registerAuthSwagger } from '../modules/auth/auth.swagger';
 import { registerUserSwagger } from '../modules/user/user.swagger';
+import { registerCategorySwagger } from '../modules/category/category.swagger';
+import { registerTagSwagger } from '../modules/tag/tag.swagger';
 
 // Extend Zod to support OpenAPI
 extendZodWithOpenApi(z);
@@ -19,6 +21,8 @@ const bearerAuth = registry.registerComponent('securitySchemes', 'bearerAuth', {
 // Register Module Routes
 registerAuthSwagger(registry, bearerAuth);
 registerUserSwagger(registry, bearerAuth);
+registerCategorySwagger(registry, bearerAuth);
+registerTagSwagger(registry, bearerAuth);
 
 export const generateSwaggerDocs = () => {
   const generator = new OpenApiGeneratorV3(registry.definitions);
