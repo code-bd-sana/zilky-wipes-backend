@@ -5,7 +5,11 @@ import fs from 'fs';
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const { pageName } = req.params;
-    const dest = `uploads/crm/${pageName || 'common'}`;
+    
+    let dest = `uploads/crm/${pageName || 'common'}`;
+    if (pageName === 'products' || pageName === 'users') {
+      dest = `uploads/${pageName}`;
+    }
     
     // Create directory if it doesn't exist
     if (!fs.existsSync(dest)) {
