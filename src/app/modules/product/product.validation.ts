@@ -8,7 +8,7 @@ const createProductVariant = z.object({
   price: z.number({ required_error: 'Price is required' }).min(0),
   stock: z.number({ required_error: 'Stock is required' }).int().min(0),
   subscriptionEligible: z.boolean().optional(),
-  subscriptionDiscount: z.number().min(0).max(1).optional()
+  subscriptionDiscount: z.number().min(0).max(100).optional().openapi({ example: 15 })
 });
 
 const createProduct = z.object({
@@ -80,7 +80,7 @@ const updateProductVariant = z.object({
     price: z.number().min(0).optional().openapi({ example: 12.00 }),
     stock: z.number().int().min(0).optional().openapi({ example: 150 }),
     subscriptionEligible: z.boolean().optional().openapi({ example: true }),
-    subscriptionDiscount: z.number().min(0).max(1).optional().openapi({ example: 0.15 })
+    subscriptionDiscount: z.number().min(0).max(100).optional().openapi({ example: 15 })
   })
 });
 
