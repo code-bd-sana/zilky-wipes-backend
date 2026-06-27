@@ -4,7 +4,7 @@ import sendResponse from '../../utils/sendResponse';
 import { AddressService } from './address.service';
 
 const createAddress: RequestHandler = catchAsync(async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user!.userId;
   const result = await AddressService.createAddress(userId, req.body);
 
   sendResponse(res, {
@@ -16,7 +16,7 @@ const createAddress: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const getMyAddresses: RequestHandler = catchAsync(async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user!.userId;
   const result = await AddressService.getMyAddresses(userId);
 
   sendResponse(res, {
@@ -28,7 +28,7 @@ const getMyAddresses: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const updateAddress: RequestHandler = catchAsync(async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user!.userId;
   const addressId = req.params.id;
   const result = await AddressService.updateAddress(userId, addressId, req.body);
 
@@ -41,7 +41,7 @@ const updateAddress: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const deleteAddress: RequestHandler = catchAsync(async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user!.userId;
   const addressId = req.params.id;
   await AddressService.deleteAddress(userId, addressId);
 

@@ -4,7 +4,7 @@ import sendResponse from '../../utils/sendResponse';
 import { SubscriptionService } from './subscription.service';
 
 const createSubscription: RequestHandler = catchAsync(async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user!.userId;
   const result = await SubscriptionService.createSubscription(userId, req.body);
 
   sendResponse(res, {
@@ -16,7 +16,7 @@ const createSubscription: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const getMySubscriptions: RequestHandler = catchAsync(async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user!.userId;
   const result = await SubscriptionService.getMySubscriptions(userId);
 
   sendResponse(res, {

@@ -4,7 +4,7 @@ import sendResponse from '../../utils/sendResponse';
 import { OrderService } from './order.service';
 
 const createOrder: RequestHandler = catchAsync(async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user!.userId;
   const result = await OrderService.createOrder(userId, req.body);
 
   sendResponse(res, {
@@ -16,7 +16,7 @@ const createOrder: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const getMyOrders: RequestHandler = catchAsync(async (req, res) => {
-  const userId = req.user.userId;
+  const userId = req.user!.userId;
   const result = await OrderService.getMyOrders(userId);
 
   sendResponse(res, {
