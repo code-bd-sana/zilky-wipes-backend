@@ -169,4 +169,30 @@ export const registerProductSwagger = (registry: OpenAPIRegistry, bearerAuth: an
       500: Error500
     }
   });
+
+  registry.registerPath({
+    method: 'post',
+    path: '/api/v1/products/{id}/variants',
+    tags: ['Products'],
+    summary: 'Add a new variant to an existing product',
+    security: [{ [bearerAuth.name]: [] }],
+    request: {
+      params: z.object({ id: z.string() }),
+      body: {
+        content: {
+          'application/json': {
+            schema: (ProductValidation.addProductVariant as any).shape.body
+          }
+        }
+      }
+    },
+    responses: {
+      201: createSuccessResponse(ProductVariantSchema, 'Variant added to product successfully', 'Variant added to product successfully.'),
+      400: Error400,
+      401: Error401,
+      403: Error403,
+      404: Error404,
+      500: Error500
+    }
+  });
 };

@@ -74,11 +74,24 @@ const updateProductVariant: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const addProductVariant: RequestHandler = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await ProductService.addProductVariant(id, req.body);
+
+  sendResponse(res, {
+    statusCode: 201,
+    success: true,
+    message: 'Variant added to product successfully',
+    data: result
+  });
+});
+
 export const ProductController = {
   createProduct,
   getAllProducts,
   getProductById,
   updateProduct,
   deleteProduct,
-  updateProductVariant
+  updateProductVariant,
+  addProductVariant
 };

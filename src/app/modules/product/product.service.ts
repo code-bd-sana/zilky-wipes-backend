@@ -113,11 +113,28 @@ const updateProductVariant = async (variantId: string, payload: IUpdateProductVa
   return result;
 };
 
+const addProductVariant = async (productId: string, payload: ICreateProductVariantPayload) => {
+  const product = await prisma.product.findUnique({ where: { id: productId } });
+  if (!product) {
+    throw new AppError(404, 'Product not found.');
+  }
+
+  const result = await prisma.productVariant.create({
+    data: {
+      ...payload,
+      productId
+    }
+  });
+
+  return result;
+};
+
 export const ProductService = {
   createProduct,
   getAllProducts,
   getProductById,
   updateProduct,
   deleteProduct,
-  updateProductVariant
+  updateProductVariant,
+  addProductVariant
 };

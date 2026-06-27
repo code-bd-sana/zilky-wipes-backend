@@ -32,4 +32,11 @@ router.patch(
   ProductController.updateProductVariant
 );
 
+router.post(
+  '/:id/variants',
+  auth('ADMIN'),
+  validateRequest(ProductValidation.addProductVariant),
+  ProductController.addProductVariant
+);
+
 export const ProductRoutes = router;

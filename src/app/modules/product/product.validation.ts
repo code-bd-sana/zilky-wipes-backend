@@ -76,16 +76,21 @@ const updateProduct = z.object({
 
 const updateProductVariant = z.object({
   body: z.object({
-    name: z.string().optional(),
-    price: z.number().min(0).optional(),
-    stock: z.number().int().min(0).optional(),
-    subscriptionEligible: z.boolean().optional(),
-    subscriptionDiscount: z.number().min(0).max(1).optional()
+    name: z.string().optional().openapi({ example: 'Single Roll' }),
+    price: z.number().min(0).optional().openapi({ example: 12.00 }),
+    stock: z.number().int().min(0).optional().openapi({ example: 150 }),
+    subscriptionEligible: z.boolean().optional().openapi({ example: true }),
+    subscriptionDiscount: z.number().min(0).max(1).optional().openapi({ example: 0.15 })
   })
+});
+
+const addProductVariant = z.object({
+  body: createProductVariant
 });
 
 export const ProductValidation = {
   createProduct,
   updateProduct,
-  updateProductVariant
+  updateProductVariant,
+  addProductVariant
 };
