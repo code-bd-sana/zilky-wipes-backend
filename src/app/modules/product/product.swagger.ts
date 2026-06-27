@@ -21,8 +21,27 @@ export const registerProductSwagger = (registry: OpenAPIRegistry, bearerAuth: an
     id: z.string(),
     name: z.string(),
     description: z.string(),
-    images: z.array(z.string()),
-    accordionDetails: z.any().nullable(),
+    images: z.array(z.string()).openapi({ example: ['https://example.com/image1.png', 'https://example.com/image2.png'] }),
+    accordionDetails: z.any().nullable().openapi({
+      example: [
+        {
+          title: 'Product Introduction',
+          content: 'ZilkyWipes replaces toilet paper with something gentler, cleaner, and far more human. A soft, biodegradable wet wipe designed for real bathrooms and real bodies.'
+        },
+        {
+          title: 'What you\'re actually using',
+          content: 'A skin-safe wet wipe roll that focuses on comfort and consistency with materials chosen for daily use.'
+        },
+        {
+          title: 'Materials',
+          content: '100% plant-based, flushable, and soothing ingredients.'
+        },
+        {
+          title: 'Benefits',
+          content: 'Gentle on skin, environmentally friendly, and fits standard toilet paper holders.'
+        }
+      ]
+    }),
     isFeatured: z.boolean(),
     categoryId: z.string(),
     tagId: z.string().nullable(),
