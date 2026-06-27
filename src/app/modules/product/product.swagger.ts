@@ -21,7 +21,11 @@ export const registerProductSwagger = (registry: OpenAPIRegistry, bearerAuth: an
     id: z.string(),
     name: z.string(),
     description: z.string(),
+    images: z.array(z.string()),
+    accordionDetails: z.any().nullable(),
+    isFeatured: z.boolean(),
     categoryId: z.string(),
+    tagId: z.string().nullable(),
     createdAt: z.string(),
     updatedAt: z.string(),
     variants: z.array(ProductVariantSchema).optional()

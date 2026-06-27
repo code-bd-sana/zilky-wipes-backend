@@ -4,14 +4,11 @@ import prisma from '../../utils/prisma';
 import type { ICreateProductPayload, IUpdateProductPayload, IUpdateProductVariantPayload } from './product.interface';
 
 const createProduct = async (payload: ICreateProductPayload) => {
-  const { tags, variants, ...productData } = payload;
+  const { variants, ...productData } = payload;
 
   const result = await prisma.product.create({
     data: {
       ...productData,
-      tags: {
-        connect: tags?.map((tagId) => ({ id: tagId })) || []
-      },
       variants: {
         create: variants
       }
@@ -19,7 +16,7 @@ const createProduct = async (payload: ICreateProductPayload) => {
     include: {
       variants: true,
       category: true,
-      tags: true
+      tag: true
     }
   });
 
@@ -38,7 +35,7 @@ const getAllProducts = async (query: Record<string, unknown>) => {
     include: {
       variants: true,
       category: true,
-      tags: true
+      tag: true
     }
   });
 
@@ -62,7 +59,7 @@ const getProductById = async (id: string) => {
     include: {
       variants: true,
       category: true,
-      tags: true
+      tag: true
     }
   });
 
@@ -74,8 +71,6 @@ const getProductById = async (id: string) => {
 };
 
 const updateProduct = async (id: string, payload: IUpdateProductPayload) => {
-  const { tags, ...productData } = payload;
-
   const product = await prisma.product.findUnique({ where: { id } });
   if (!product) {
     throw new AppError(404, 'Product not found.');
@@ -83,18 +78,11 @@ const updateProduct = async (id: string, payload: IUpdateProductPayload) => {
 
   const result = await prisma.product.update({
     where: { id },
-    data: {
-      ...productData,
-      ...(tags && {
-        tags: {
-          set: tags.map((tagId) => ({ id: tagId }))
-        }
-      })
-    },
+    data: payload,
     include: {
       variants: true,
       category: true,
-      tags: true
+      tag: true
     }
   });
 

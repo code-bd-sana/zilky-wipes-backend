@@ -9,8 +9,11 @@ export interface ICreateProductVariantPayload {
 export interface ICreateProductPayload {
   name: string;
   description: string;
+  images: string[];
+  accordionDetails?: any;
+  isFeatured?: boolean;
   categoryId: string;
-  tags?: string[];
+  tagId?: string;
   variants: ICreateProductVariantPayload[];
 }
 
@@ -19,6 +22,9 @@ export interface IUpdateProductVariantPayload extends Partial<ICreateProductVari
 export interface IUpdateProductPayload {
   name?: string;
   description?: string;
+  images?: string[];
+  accordionDetails?: any;
+  isFeatured?: boolean;
   categoryId?: string;
-  tags?: string[];
+  tagId?: string;
 }
