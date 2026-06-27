@@ -5,6 +5,10 @@ import { registerAuthSwagger } from '../modules/auth/auth.swagger';
 import { registerUserSwagger } from '../modules/user/user.swagger';
 import { registerCategorySwagger } from '../modules/category/category.swagger';
 import { registerTagSwagger } from '../modules/tag/tag.swagger';
+import { registerAddressSwagger } from '../modules/address/address.swagger';
+import { registerProductSwagger } from '../modules/product/product.swagger';
+import { registerOrderSwagger } from '../modules/order/order.swagger';
+import { registerSubscriptionSwagger } from '../modules/subscription/subscription.swagger';
 
 // Extend Zod to support OpenAPI
 extendZodWithOpenApi(z);
@@ -23,6 +27,10 @@ registerAuthSwagger(registry, bearerAuth);
 registerUserSwagger(registry, bearerAuth);
 registerCategorySwagger(registry, bearerAuth);
 registerTagSwagger(registry, bearerAuth);
+registerAddressSwagger(registry, bearerAuth);
+registerProductSwagger(registry, bearerAuth);
+registerOrderSwagger(registry, bearerAuth);
+registerSubscriptionSwagger(registry, bearerAuth);
 
 export const generateSwaggerDocs = () => {
   const generator = new OpenApiGeneratorV3(registry.definitions);
