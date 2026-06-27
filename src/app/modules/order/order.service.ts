@@ -12,37 +12,89 @@ const generateOrderNumber = () => {
 
 const createOrder = async (userId: string, payload: ICreateOrderPayload) => {
   const orderNumber = generateOrderNumber();
+  // 1. Fetch all product variants from database to get REAL prices and stock
+  const variantIds = payload.items.map(item => item.productVariantId);
+  const variants = await prisma.productVariant.findMany({
+    where: { id: { in: variantIds } }
+  });
 
-  const result = await prisma.order.create({
-    data: {
-      orderNumber,
-      userId,
-      subtotal: payload.subtotal,
-      shippingCost: payload.shippingCost,
-      total: payload.total,
-      shippingFirstName: payload.shippingAddress.firstName,
-      shippingLastName: payload.shippingAddress.lastName,
-      shippingStreetAddress: payload.shippingAddress.streetAddress,
-      shippingCity: payload.shippingAddress.city,
-      shippingState: payload.shippingAddress.state,
-      shippingPostalCode: payload.shippingAddress.postalCode,
-      shippingCountry: payload.shippingAddress.country,
-      shippingPhone: payload.shippingAddress.phone,
-      items: {
-        create: payload.items.map(item => ({
-          productVariantId: item.productVariantId,
-          quantity: item.quantity,
-          price: item.price
-        }))
-      }
-    },
-    include: {
-      items: {
-        include: {
-          productVariant: true
+  let calculatedSubtotal = 0;
+  const orderItemsData = [];
+
+  // 2. Validate stock and calculate true subtotal
+  for (const item of payload.items) {
+    const variant = variants.find(v => v.id === item.productVariantId);
+    if (!variant) {
+      throw new AppError(404, `Product variant not found: ${item.productVariantId}`);
+    }
+
+    if (variant.stock < item.quantity) {
+      throw new AppError(400, `Insufficient stock for ${variant.name}. Available: ${variant.stock}, Requested: ${item.quantity}`);
+    }
+
+    // ALWAYS use the price from the database, ignore frontend payload price!
+    const backendPrice = variant.price;
+    calculatedSubtotal += backendPrice * item.quantity;
+
+    orderItemsData.push({
+      productVariantId: item.productVariantId,
+      quantity: item.quantity,
+      price: backendPrice
+    });
+  }
+
+  // 3. Fetch shipping config to calculate true shipping cost
+  const shippingConfig = await prisma.shippingConfig.findFirst();
+  let calculatedShippingCost = shippingConfig ? shippingConfig.flatRate : 0;
+
+  if (shippingConfig && calculatedSubtotal >= shippingConfig.freeShippingThreshold) {
+    calculatedShippingCost = 0; // Free shipping if subtotal exceeds threshold
+  }
+
+  const calculatedTotal = calculatedSubtotal + calculatedShippingCost;
+
+  // 4. Use Database Transaction to create order AND deduct stock atomically
+  const result = await prisma.$transaction(async (tx) => {
+    // Deduct stock for each item
+    for (const item of payload.items) {
+      await tx.productVariant.update({
+        where: { id: item.productVariantId },
+        data: {
+          stock: { decrement: item.quantity }
+        }
+      });
+    }
+
+    // Create the order with system-calculated values
+    const order = await tx.order.create({
+      data: {
+        orderNumber,
+        userId,
+        subtotal: calculatedSubtotal,
+        shippingCost: calculatedShippingCost,
+        total: calculatedTotal,
+        shippingFirstName: payload.shippingAddress.firstName,
+        shippingLastName: payload.shippingAddress.lastName,
+        shippingStreetAddress: payload.shippingAddress.streetAddress,
+        shippingCity: payload.shippingAddress.city,
+        shippingState: payload.shippingAddress.state,
+        shippingPostalCode: payload.shippingAddress.postalCode,
+        shippingCountry: payload.shippingAddress.country,
+        shippingPhone: payload.shippingAddress.phone,
+        items: {
+          create: orderItemsData
+        }
+      },
+      include: {
+        items: {
+          include: {
+            productVariant: true
+          }
         }
       }
-    }
+    });
+
+    return order;
   });
 
   return result;
@@ -151,7 +203,7 @@ const updateOrderTracking = async (id: string, payload: IUpdateOrderTrackingPayl
   });
 
   // Here we would typically send an email with the tracking number
-  
+
   return result;
 };
 

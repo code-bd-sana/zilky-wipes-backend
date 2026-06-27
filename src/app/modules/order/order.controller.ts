@@ -5,6 +5,7 @@ import { OrderService } from './order.service';
 
 const createOrder: RequestHandler = catchAsync(async (req, res) => {
   const userId = req.user!.userId;
+
   const result = await OrderService.createOrder(userId, req.body);
 
   sendResponse(res, {
@@ -43,7 +44,7 @@ const getOrderById: RequestHandler = catchAsync(async (req, res) => {
   const { id } = req.params;
   const userId = req.user?.userId;
   const role = req.user?.role;
-  
+
   const result = await OrderService.getOrderById(id, userId, role);
 
   sendResponse(res, {
