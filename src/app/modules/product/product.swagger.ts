@@ -59,8 +59,38 @@ export const registerProductSwagger = (registry: OpenAPIRegistry, bearerAuth: an
     request: {
       body: {
         content: {
-          'application/json': {
-            schema: (ProductValidation.createProduct as any).shape.body
+          'multipart/form-data': {
+            schema: {
+              type: 'object',
+              properties: {
+                data: {
+                  type: 'string',
+                  description: 'JSON string of product data',
+                  example: JSON.stringify({
+                    name: 'Zilky Wipes',
+                    description: 'Premium Cleansing Wipes',
+                    isFeatured: true,
+                    categoryId: 'YOUR_CATEGORY_ID',
+                    tagId: 'YOUR_TAG_ID',
+                    accordionDetails: [
+                      { title: 'Materials', content: '100% plant-based' }
+                    ],
+                    variants: [
+                      { name: 'Single Roll', price: 12, stock: 100, subscriptionEligible: true, subscriptionDiscount: 15 }
+                    ]
+                  }, null, 2)
+                },
+                images: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    format: 'binary'
+                  },
+                  description: 'Select product images to upload'
+                }
+              },
+              required: ['data', 'images']
+            }
           }
         }
       }
@@ -110,8 +140,29 @@ export const registerProductSwagger = (registry: OpenAPIRegistry, bearerAuth: an
       params: z.object({ id: z.string() }),
       body: {
         content: {
-          'application/json': {
-            schema: (ProductValidation.updateProduct as any).shape.body
+          'multipart/form-data': {
+            schema: {
+              type: 'object',
+              properties: {
+                data: {
+                  type: 'string',
+                  description: 'JSON string of product data to update',
+                  example: JSON.stringify({
+                    name: 'Updated Zilky Wipes',
+                    description: 'Updated Description',
+                    isFeatured: false
+                  }, null, 2)
+                },
+                images: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    format: 'binary'
+                  },
+                  description: 'Select new product images to upload (optional)'
+                }
+              }
+            }
           }
         }
       }
