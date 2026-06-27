@@ -10,14 +10,13 @@ const generateOrderNumber = () => {
   return `#ORD-${timestamp}-${random}`;
 };
 
-const createOrder = async (userId: string | undefined, payload: ICreateOrderPayload) => {
+const createOrder = async (userId: string, payload: ICreateOrderPayload) => {
   const orderNumber = generateOrderNumber();
 
   const result = await prisma.order.create({
     data: {
       orderNumber,
       userId,
-      guestEmail: payload.guestEmail,
       subtotal: payload.subtotal,
       shippingCost: payload.shippingCost,
       total: payload.total,
@@ -68,7 +67,7 @@ const getMyOrders = async (userId: string) => {
 
 const getAllOrders = async (query: Record<string, unknown>) => {
   const queryBuilder = new QueryBuilder(query)
-    .search(['orderNumber', 'guestEmail'])
+    .search(['orderNumber'])
     .filter()
     .sort()
     .paginate();

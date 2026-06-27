@@ -3,7 +3,6 @@ import { OrderStatus } from '@prisma/client';
 
 const createOrder = z.object({
   body: z.object({
-    guestEmail: z.string().email().optional(),
     items: z.array(z.object({
       productVariantId: z.string(),
       quantity: z.number().int().min(1),

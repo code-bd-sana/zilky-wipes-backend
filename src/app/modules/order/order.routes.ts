@@ -6,9 +6,10 @@ import { OrderValidation } from './order.validation';
 
 const router = Router();
 
-// Create order can be accessed by guest (unauthenticated) or user
+// Create order requires authentication now
 router.post(
   '/',
+  auth('USER', 'ADMIN'),
   validateRequest(OrderValidation.createOrder),
   OrderController.createOrder
 );

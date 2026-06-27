@@ -8,7 +8,6 @@ export const registerOrderSwagger = (registry: OpenAPIRegistry, bearerAuth: any)
     id: z.string(),
     orderNumber: z.string(),
     userId: z.string().nullable(),
-    guestEmail: z.string().nullable(),
     status: z.string(),
     subtotal: z.number(),
     shippingCost: z.number(),
@@ -32,6 +31,7 @@ export const registerOrderSwagger = (registry: OpenAPIRegistry, bearerAuth: any)
     path: '/api/v1/orders',
     tags: ['Orders'],
     summary: 'Create a new order',
+    security: [{ [bearerAuth.name]: [] }],
     request: {
       body: {
         content: {

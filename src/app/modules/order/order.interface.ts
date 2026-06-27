@@ -1,7 +1,6 @@
 import { OrderStatus } from '@prisma/client';
 
 export interface ICreateOrderPayload {
-  guestEmail?: string;
   items: {
     productVariantId: string;
     quantity: number;

@@ -165,8 +165,7 @@ model Address {
 model Order {
   id             String      @id @default(uuid())
   orderNumber    String      @unique
-  userId         String?
-  guestEmail     String?
+  userId         String
   status         OrderStatus @default(PROCESSING)
   subtotal       Float
   shippingCost   Float
