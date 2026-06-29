@@ -12,8 +12,8 @@ export interface ICreateProductPayload {
   images: string[];
   accordionDetails?: any;
   isFeatured?: boolean;
-  categoryId: string;
-  tagId?: string;
+  categoryIds: string[];
+  tagIds?: string[];
   variants: ICreateProductVariantPayload[];
 }
 
@@ -25,6 +25,6 @@ export interface IUpdateProductPayload {
   images?: string[];
   accordionDetails?: any;
   isFeatured?: boolean;
-  categoryId?: string;
-  tagId?: string;
+  categoryIds?: string[];
+  tagIds?: string[];
 }

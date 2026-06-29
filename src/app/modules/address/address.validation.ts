@@ -2,13 +2,13 @@ import { z } from 'zod';
 
 const createAddress = z.object({
   body: z.object({
-    firstName: z.string({ required_error: 'First name is required' }),
-    lastName: z.string({ required_error: 'Last name is required' }),
-    streetAddress: z.string({ required_error: 'Street address is required' }),
-    city: z.string({ required_error: 'City is required' }),
-    state: z.string({ required_error: 'State is required' }),
-    postalCode: z.string({ required_error: 'Postal code is required' }),
-    country: z.string({ required_error: 'Country is required' }),
+    firstName: z.string({ message: 'First name is required' }),
+    lastName: z.string({ message: 'Last name is required' }),
+    streetAddress: z.string({ message: 'Street address is required' }),
+    city: z.string({ message: 'City is required' }),
+    state: z.string({ message: 'State is required' }),
+    postalCode: z.string({ message: 'Postal code is required' }),
+    country: z.string({ message: 'Country is required' }),
     phone: z.string().optional(),
     isDefault: z.boolean().optional()
   })

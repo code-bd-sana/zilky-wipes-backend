@@ -85,7 +85,7 @@ model Category {
   name        String    @unique
   slug        String    @unique
   description String?
-  products    Product[]
+  products    Product[] @relation("ProductCategories")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -97,7 +97,7 @@ model Tag {
   id       String    @id @default(uuid())
   name     String    @unique
   slug     String    @unique
-  products Product[]
+  products Product[] @relation("ProductTags")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -113,11 +113,8 @@ model Product {
   accordionDetails Json?
   isFeatured       Boolean  @default(false)
 
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
-
-  tagId      String?
-  tag        Tag?     @relation(fields: [tagId], references: [id])
+  categories Category[] @relation("ProductCategories")
+  tags       Tag[]      @relation("ProductTags")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

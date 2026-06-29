@@ -33,7 +33,7 @@ export const registerCategorySwagger = (registry: OpenAPIRegistry, bearerAuth: a
       400: Error400,
       401: Error401,
       403: Error403,
-      409: createErrorResponse(409, 'Category with this name already exists.'),
+      409: createErrorResponse('Conflict', 'Category with this name already exists.'),
       500: Error500
     }
   });
@@ -90,7 +90,7 @@ export const registerCategorySwagger = (registry: OpenAPIRegistry, bearerAuth: a
       401: Error401,
       403: Error403,
       404: Error404,
-      409: createErrorResponse(409, 'Category with this name already exists.'),
+      409: createErrorResponse('Conflict', 'Category with this name already exists.'),
       500: Error500
     }
   });
