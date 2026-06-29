@@ -28,7 +28,7 @@ const getAllProducts: RequestHandler = catchAsync(async (req, res) => {
 
 const getProductById: RequestHandler = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await ProductService.getProductById(id);
+  const result = await ProductService.getProductById(id as string);
 
   sendResponse(res, {
     statusCode: 200,
@@ -40,7 +40,7 @@ const getProductById: RequestHandler = catchAsync(async (req, res) => {
 
 const updateProduct: RequestHandler = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await ProductService.updateProduct(id, req.body);
+  const result = await ProductService.updateProduct(id as string, req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -52,7 +52,7 @@ const updateProduct: RequestHandler = catchAsync(async (req, res) => {
 
 const deleteProduct: RequestHandler = catchAsync(async (req, res) => {
   const { id } = req.params;
-  await ProductService.deleteProduct(id);
+  await ProductService.deleteProduct(id as string);
 
   sendResponse(res, {
     statusCode: 200,
@@ -64,7 +64,7 @@ const deleteProduct: RequestHandler = catchAsync(async (req, res) => {
 
 const updateProductVariant: RequestHandler = catchAsync(async (req, res) => {
   const { variantId } = req.params;
-  const result = await ProductService.updateProductVariant(variantId, req.body);
+  const result = await ProductService.updateProductVariant(variantId as string, req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -76,7 +76,7 @@ const updateProductVariant: RequestHandler = catchAsync(async (req, res) => {
 
 const addProductVariant: RequestHandler = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await ProductService.addProductVariant(id, req.body);
+  const result = await ProductService.addProductVariant(id as string, req.body);
 
   sendResponse(res, {
     statusCode: 201,

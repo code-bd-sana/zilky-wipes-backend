@@ -29,7 +29,7 @@ const getMyAddresses: RequestHandler = catchAsync(async (req, res) => {
 
 const updateAddress: RequestHandler = catchAsync(async (req, res) => {
   const userId = req.user!.userId;
-  const addressId = req.params.id;
+  const addressId = req.params.id as string;
   const result = await AddressService.updateAddress(userId, addressId, req.body);
 
   sendResponse(res, {
@@ -42,7 +42,7 @@ const updateAddress: RequestHandler = catchAsync(async (req, res) => {
 
 const deleteAddress: RequestHandler = catchAsync(async (req, res) => {
   const userId = req.user!.userId;
-  const addressId = req.params.id;
+  const addressId = req.params.id as string;
   await AddressService.deleteAddress(userId, addressId);
 
   sendResponse(res, {

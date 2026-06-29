@@ -44,7 +44,7 @@ const getSubscriptionById: RequestHandler = catchAsync(async (req, res) => {
   const userId = req.user?.userId;
   const role = req.user?.role;
   
-  const result = await SubscriptionService.getSubscriptionById(id, userId, role);
+  const result = await SubscriptionService.getSubscriptionById(id as string, userId, role);
 
   sendResponse(res, {
     statusCode: 200,
@@ -56,7 +56,7 @@ const getSubscriptionById: RequestHandler = catchAsync(async (req, res) => {
 
 const updateSubscriptionStatus: RequestHandler = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await SubscriptionService.updateSubscriptionStatus(id, req.body);
+  const result = await SubscriptionService.updateSubscriptionStatus(id as string, req.body);
 
   sendResponse(res, {
     statusCode: 200,

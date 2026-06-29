@@ -45,7 +45,7 @@ const getOrderById: RequestHandler = catchAsync(async (req, res) => {
   const userId = req.user?.userId;
   const role = req.user?.role;
 
-  const result = await OrderService.getOrderById(id, userId, role);
+  const result = await OrderService.getOrderById(id as string, userId, role);
 
   sendResponse(res, {
     statusCode: 200,
@@ -57,7 +57,7 @@ const getOrderById: RequestHandler = catchAsync(async (req, res) => {
 
 const updateOrderStatus: RequestHandler = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await OrderService.updateOrderStatus(id, req.body);
+  const result = await OrderService.updateOrderStatus(id as string, req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -69,7 +69,7 @@ const updateOrderStatus: RequestHandler = catchAsync(async (req, res) => {
 
 const updateOrderTracking: RequestHandler = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await OrderService.updateOrderTracking(id, req.body);
+  const result = await OrderService.updateOrderTracking(id as string, req.body);
 
   sendResponse(res, {
     statusCode: 200,
