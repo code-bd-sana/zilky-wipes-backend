@@ -22,9 +22,37 @@ model User {
   @@map("users")
 }
 
+model UserProfile {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  profileImage     String?
+  stripeCustomerId String?  @unique
+  phone            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("user_profiles")
+}
+
 enum Role {
   USER
   ADMIN
+}
+
+enum OrderStatus {
+  PROCESSING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  PAUSED
+  UNPAID
 }
 
 model Page {
@@ -50,4 +78,151 @@ model Section {
 
   @@unique([pageId, sectionKey])
   @@map("sections")
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  products    Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
+model Tag {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  slug     String    @unique
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tags")
+}
+
+model Product {
+  id               String   @id @default(uuid())
+  name             String
+  description      String
+  images           String[]
+  accordionDetails Json?
+  isFeatured       Boolean  @default(false)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  tagId      String?
+  tag        Tag?     @relation(fields: [tagId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  variants  ProductVariant[]
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id                   String           @id @default(uuid())
+  productId            String
+  product              Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name                 String           // e.g. "Starter Kit", "Refill Pack", "3-Pack"
+  price                Float
+  stock                Int
+  subscriptionEligible Boolean          @default(true)
+  subscriptionDiscount Float            @default(0.15) // default 15% discount
+  stripePriceId        String?          // Stripe Price ID for subscription / checkout billing
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  orderItems           OrderItem[]
+  subscriptions        Subscription[]
+
+  @@map("product_variants")
+}
+
+model Address {
+  id            String   @id @default(uuid())
+  userId        String?
+  firstName     String
+  lastName      String
+  streetAddress String
+  city          String
+  state         String
+  postalCode    String
+  country       String
+  phone         String?
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("addresses")
+}
+
+model Order {
+  id             String      @id @default(uuid())
+  orderNumber    String      @unique
+  userId         String
+  status         OrderStatus @default(PROCESSING)
+  subtotal       Float
+  shippingCost   Float
+  total          Float
+  trackingNumber String?
+  paymentIntentId String?    @unique
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  items          OrderItem[]
+
+  // Address snapshot to persist order details even if user deletes address
+  shippingFirstName     String
+  shippingLastName      String
+  shippingStreetAddress String
+  shippingCity          String
+  shippingState         String
+  shippingPostalCode    String
+  shippingCountry       String
+  shippingPhone         String?
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id               String         @id @default(uuid())
+  orderId          String
+  order            Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productVariantId String
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+  quantity         Int
+  price            Float          // price at the time of purchase
+
+  @@map("order_items")
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  stripeSubscriptionId String             @unique
+  userId               String
+  productVariantId     String
+  productVariant       ProductVariant     @relation(fields: [productVariantId], references: [id])
+  status               SubscriptionStatus @default(ACTIVE)
+  frequency            String             // e.g., "Every 1 Month"
+  startingDate         DateTime           @default(now())
+  nextBillingDate      DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@map("subscriptions")
+}
+
+model ShippingConfig {
+  id                    String   @id @default(uuid())
+  flatRate              Float    @default(5.0)
+  freeShippingThreshold Float    @default(50.0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("shipping_configs")
 }

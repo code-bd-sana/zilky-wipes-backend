@@ -8,7 +8,8 @@ const getMe = async (userId: string) => {
     where: { id: userId },
     select: {
       id: true,
-      name: true,
+      firstName: true,
+      lastName: true,
       email: true,
       role: true,
       createdAt: true,
@@ -25,7 +26,7 @@ const getMe = async (userId: string) => {
 
 const getAllUsers = async (query: Record<string, unknown>) => {
   const queryBuilder = new QueryBuilder(query)
-    .search(['name', 'email'])
+    .search(['firstName', 'lastName', 'email'])
     .filter()
     .sort()
     .paginate();
@@ -34,7 +35,8 @@ const getAllUsers = async (query: Record<string, unknown>) => {
     ...queryBuilder.build(),
     select: {
       id: true,
-      name: true,
+      firstName: true,
+      lastName: true,
       email: true,
       role: true,
       createdAt: true,
@@ -70,7 +72,8 @@ const changeRole = async (id: string, payload: IChangeRolePayload) => {
     data: { role: payload.role },
     select: {
       id: true,
-      name: true,
+      firstName: true,
+      lastName: true,
       email: true,
       role: true
     }
