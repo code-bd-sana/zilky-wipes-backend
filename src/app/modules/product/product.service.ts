@@ -1,22 +1,30 @@
 import AppError from '../../errors/AppError';
 import { QueryBuilder } from '../../utils/QueryBuilder';
 import prisma from '../../utils/prisma';
-import type { ICreateProductPayload, IUpdateProductPayload, IUpdateProductVariantPayload } from './product.interface';
+import type { ICreateProductPayload, IUpdateProductPayload, IUpdateProductVariantPayload, ICreateProductVariantPayload } from './product.interface';
 
 const createProduct = async (payload: ICreateProductPayload) => {
-  const { variants, ...productData } = payload;
+  const { variants, categoryIds, tagIds, ...productData } = payload;
 
   const result = await prisma.product.create({
     data: {
       ...productData,
       variants: {
         create: variants
-      }
+      },
+      categories: {
+        connect: categoryIds.map((id) => ({ id }))
+      },
+      ...(tagIds && tagIds.length > 0 && {
+        tags: {
+          connect: tagIds.map((id) => ({ id }))
+        }
+      })
     },
     include: {
       variants: true,
-      category: true,
-      tag: true
+      categories: true,
+      tags: true
     }
   });
 
@@ -34,8 +42,8 @@ const getAllProducts = async (query: Record<string, unknown>) => {
     ...queryBuilder.build(),
     include: {
       variants: true,
-      category: true,
-      tag: true
+      categories: true,
+      tags: true
     }
   });
 
@@ -58,8 +66,8 @@ const getProductById = async (id: string) => {
     where: { id },
     include: {
       variants: true,
-      category: true,
-      tag: true
+      categories: true,
+      tags: true
     }
   });
 
@@ -76,13 +84,27 @@ const updateProduct = async (id: string, payload: IUpdateProductPayload) => {
     throw new AppError(404, 'Product not found.');
   }
 
+  const { categoryIds, tagIds, ...updateData } = payload;
+
   const result = await prisma.product.update({
     where: { id },
-    data: payload,
+    data: {
+      ...updateData,
+      ...(categoryIds && {
+        categories: {
+          set: categoryIds.map((catId) => ({ id: catId }))
+        }
+      }),
+      ...(tagIds && {
+        tags: {
+          set: tagIds.map((tId) => ({ id: tId }))
+        }
+      })
+    },
     include: {
       variants: true,
-      category: true,
-      tag: true
+      categories: true,
+      tags: true
     }
   });
 

@@ -19,7 +19,7 @@ const createOrder = async (userId: string, payload: ICreateOrderPayload) => {
   });
 
   let calculatedSubtotal = 0;
-  const orderItemsData = [];
+  const orderItemsData: { productVariantId: string; quantity: number; price: number }[] = [];
 
   // 2. Validate stock and calculate true subtotal
   for (const item of payload.items) {
