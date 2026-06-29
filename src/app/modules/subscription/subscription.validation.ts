@@ -3,9 +3,9 @@ import { SubscriptionStatus } from '@prisma/client';
 
 const createSubscription = z.object({
   body: z.object({
-    productVariantId: z.string({ required_error: 'Product Variant ID is required' }),
-    stripeSubscriptionId: z.string({ required_error: 'Stripe Subscription ID is required' }),
-    frequency: z.string({ required_error: 'Frequency is required' })
+    productVariantId: z.string({ message: 'Product Variant ID is required' }),
+    stripeSubscriptionId: z.string({ message: 'Stripe Subscription ID is required' }),
+    frequency: z.string({ message: 'Frequency is required' })
   })
 });
 

@@ -32,7 +32,7 @@ const updateOrderStatus = z.object({
 
 const updateOrderTracking = z.object({
   body: z.object({
-    trackingNumber: z.string({ required_error: 'Tracking number is required' })
+    trackingNumber: z.string({ message: 'Tracking number is required' })
   })
 });
 

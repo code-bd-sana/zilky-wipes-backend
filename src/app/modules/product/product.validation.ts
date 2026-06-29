@@ -4,17 +4,17 @@ import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 extendZodWithOpenApi(z);
 
 const createProductVariant = z.object({
-  name: z.string({ required_error: 'Variant name is required' }),
-  price: z.number({ required_error: 'Price is required' }).min(0),
-  stock: z.number({ required_error: 'Stock is required' }).int().min(0),
+  name: z.string({ message: 'Variant name is required' }),
+  price: z.number({ message: 'Price is required' }).min(0),
+  stock: z.number({ message: 'Stock is required' }).int().min(0),
   subscriptionEligible: z.boolean().optional(),
   subscriptionDiscount: z.number().min(0).max(100).optional().openapi({ example: 15 })
 });
 
 const createProduct = z.object({
   body: z.object({
-    name: z.string({ required_error: 'Name is required' }),
-    description: z.string({ required_error: 'Description is required' }),
+    name: z.string({ message: 'Name is required' }),
+    description: z.string({ message: 'Description is required' }),
     images: z.array(z.string()).min(1, 'At least one image is required').openapi({ example: ['https://example.com/image1.png'] }),
     accordionDetails: z.any().optional().openapi({
       example: [
@@ -37,8 +37,9 @@ const createProduct = z.object({
       ]
     }),
     isFeatured: z.boolean().optional(),
-    categoryId: z.string({ required_error: 'Category ID is required' }),
-    tagId: z.string().optional(),
+    categoryId: z.string().optional(), // Keeping for backward compatibility temporarily if needed, but not required
+    categoryIds: z.array(z.string()).min(1, 'At least one category is required'),
+    tagIds: z.array(z.string()).optional(),
     variants: z.array(createProductVariant).min(1, 'At least one variant is required')
   })
 });
@@ -69,8 +70,8 @@ const updateProduct = z.object({
       ]
     }),
     isFeatured: z.boolean().optional(),
-    categoryId: z.string().optional(),
-    tagId: z.string().optional()
+    categoryIds: z.array(z.string()).optional(),
+    tagIds: z.array(z.string()).optional()
   })
 });
 
