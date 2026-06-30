@@ -17,7 +17,9 @@ export interface ICreateProductPayload {
   variants: ICreateProductVariantPayload[];
 }
 
-export interface IUpdateProductVariantPayload extends Partial<ICreateProductVariantPayload> {}
+export interface IUpdateProductVariantPayload extends Partial<ICreateProductVariantPayload> {
+  id?: string;
+}
 
 export interface IUpdateProductPayload {
   name?: string;
@@ -27,4 +29,5 @@ export interface IUpdateProductPayload {
   isFeatured?: boolean;
   categoryIds?: string[];
   tagIds?: string[];
+  variants?: IUpdateProductVariantPayload[];
 }
