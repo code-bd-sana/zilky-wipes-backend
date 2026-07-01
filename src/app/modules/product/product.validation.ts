@@ -71,7 +71,15 @@ const updateProduct = z.object({
     }),
     isFeatured: z.boolean().optional(),
     categoryIds: z.array(z.string()).optional(),
-    tagIds: z.array(z.string()).optional()
+    tagIds: z.array(z.string()).optional(),
+    variants: z.array(z.object({
+      id: z.string().optional(),
+      name: z.string().optional(),
+      price: z.number().min(0).optional(),
+      stock: z.number().int().min(0).optional(),
+      subscriptionEligible: z.boolean().optional(),
+      subscriptionDiscount: z.number().min(0).max(100).optional()
+    })).optional()
   })
 });
 

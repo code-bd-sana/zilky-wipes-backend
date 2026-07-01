@@ -84,7 +84,7 @@ const updateProduct = async (id: string, payload: IUpdateProductPayload) => {
     throw new AppError(404, 'Product not found.');
   }
 
-  const { categoryIds, tagIds, ...updateData } = payload;
+  const { categoryIds, tagIds, variants, ...updateData } = payload;
 
   const result = await prisma.product.update({
     where: { id },
@@ -98,6 +98,30 @@ const updateProduct = async (id: string, payload: IUpdateProductPayload) => {
       ...(tagIds && {
         tags: {
           set: tagIds.map((tId) => ({ id: tId }))
+        }
+      }),
+      ...(variants && {
+        variants: {
+          deleteMany: {
+            id: { notIn: variants.map(v => v.id).filter(Boolean) as string[] }
+          },
+          upsert: variants.map(v => ({
+            where: { id: v.id || 'non_existent_id' },
+            create: {
+              name: v.name!,
+              price: v.price!,
+              stock: v.stock!,
+              subscriptionEligible: v.subscriptionEligible,
+              subscriptionDiscount: v.subscriptionDiscount
+            },
+            update: {
+              name: v.name,
+              price: v.price,
+              stock: v.stock,
+              subscriptionEligible: v.subscriptionEligible,
+              subscriptionDiscount: v.subscriptionDiscount
+            }
+          }))
         }
       })
     },
