@@ -10,6 +10,7 @@ import { AddressRoutes } from '../modules/address/address.routes';
 import { ProductRoutes } from '../modules/product/product.routes';
 import { OrderRoutes } from '../modules/order/order.routes';
 import { SubscriptionRoutes } from '../modules/subscription/subscription.routes';
+import { CouponRoutes } from '../modules/coupon/coupon.routes';
 
 const router = Router();
 
@@ -53,6 +54,10 @@ const moduleRoutes = [
   {
     path: '/subscriptions',
     route: SubscriptionRoutes
+  },
+  {
+    path: '/coupons',
+    route: CouponRoutes
   }
 ];
 

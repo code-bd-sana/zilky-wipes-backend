@@ -10,6 +10,7 @@ import { registerProductSwagger } from '../modules/product/product.swagger';
 import { registerOrderSwagger } from '../modules/order/order.swagger';
 import { registerSubscriptionSwagger } from '../modules/subscription/subscription.swagger';
 import { registerUploadSwagger } from '../modules/upload/upload.swagger';
+import { registerCouponSwagger } from '../modules/coupon/coupon.swagger';
 
 // Extend Zod to support OpenAPI
 extendZodWithOpenApi(z);
@@ -33,6 +34,7 @@ registerProductSwagger(registry, bearerAuth);
 registerOrderSwagger(registry, bearerAuth);
 registerSubscriptionSwagger(registry, bearerAuth);
 registerUploadSwagger(registry, bearerAuth);
+registerCouponSwagger(registry, bearerAuth);
 
 export const generateSwaggerDocs = () => {
   const generator = new OpenApiGeneratorV3(registry.definitions);
