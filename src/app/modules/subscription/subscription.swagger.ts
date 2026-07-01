@@ -27,7 +27,10 @@ export const registerSubscriptionSwagger = (registry: OpenAPIRegistry, bearerAut
       body: {
         content: {
           'application/json': {
-            schema: (SubscriptionValidation.createSubscription as any).shape.body
+            schema: z.object({
+              productVariantId: z.string(),
+              frequency: z.string()
+            })
           }
         }
       }

@@ -3,9 +3,9 @@ import { DiscountType } from '@prisma/client';
 
 const createCoupon = z.object({
   body: z.object({
-    code: z.string({ required_error: 'Coupon code is required' }),
-    discountType: z.nativeEnum(DiscountType, { required_error: 'Discount type is required' }),
-    discountValue: z.number({ required_error: 'Discount value is required' }).min(0),
+    code: z.string({ message: 'Coupon code is required' }),
+    discountType: z.nativeEnum(DiscountType, { message: 'Discount type is required' }),
+    discountValue: z.number({ message: 'Discount value is required' }).min(0),
     minOrderValue: z.number().min(0).optional(),
     maxDiscount: z.number().min(0).optional(),
     validFrom: z.string().datetime().optional(),

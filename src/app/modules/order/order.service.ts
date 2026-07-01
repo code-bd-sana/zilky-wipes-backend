@@ -1,6 +1,8 @@
 import AppError from '../../errors/AppError';
 import { QueryBuilder } from '../../utils/QueryBuilder';
 import prisma from '../../utils/prisma';
+import stripe from '../../utils/stripe';
+import config from '../../config';
 import type { ICreateOrderPayload, IUpdateOrderStatusPayload, IUpdateOrderTrackingPayload } from './order.interface';
 
 // Generate a random order number
@@ -97,7 +99,48 @@ const createOrder = async (userId: string, payload: ICreateOrderPayload) => {
     return order;
   });
 
-  return result;
+  // Create Stripe Checkout Session
+  const lineItems = orderItemsData.map(item => {
+    const variant = variants.find(v => v.id === item.productVariantId);
+    return {
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: variant?.name || 'Product Variant',
+        },
+        unit_amount: Math.round(item.price * 100), // Stripe expects cents
+      },
+      quantity: item.quantity,
+    };
+  });
+
+  if (calculatedShippingCost > 0) {
+    lineItems.push({
+      price_data: {
+        currency: 'usd',
+        product_data: { name: 'Shipping Cost' },
+        unit_amount: Math.round(calculatedShippingCost * 100),
+      },
+      quantity: 1,
+    });
+  }
+
+  // Assuming result.discountAmount exists if we implement coupon, but keeping it simple based on current schema
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: lineItems,
+    mode: 'payment',
+    success_url: `${config.stripe.frontendUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${config.stripe.frontendUrl}/payment-cancel`,
+    metadata: {
+      orderId: result.id
+    }
+  });
+
+  return {
+    ...result,
+    checkoutUrl: session.url
+  };
 };
 
 const getMyOrders = async (userId: string) => {

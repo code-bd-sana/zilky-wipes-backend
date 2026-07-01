@@ -25,7 +25,7 @@ const getAllCoupons = async (query: Record<string, unknown>) => {
     .sort()
     .paginate();
 
-  const coupons = await prisma.coupon.findMany(queryBuilder.build());
+  const coupons = await prisma.coupon.findMany(queryBuilder.build() as any);
   const total = await prisma.coupon.count({ where: queryBuilder.build().where });
 
   return {

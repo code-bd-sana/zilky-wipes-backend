@@ -27,7 +27,7 @@ const getAllCoupons: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const getCouponById: RequestHandler = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const result = await CouponService.getCouponById(id);
 
   sendResponse(res, {
@@ -39,7 +39,7 @@ const getCouponById: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const getCouponByCode: RequestHandler = catchAsync(async (req, res) => {
-  const { code } = req.params;
+  const code = req.params.code as string;
   const result = await CouponService.getCouponByCode(code);
 
   sendResponse(res, {
@@ -51,7 +51,7 @@ const getCouponByCode: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const updateCoupon: RequestHandler = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const result = await CouponService.updateCoupon(id, req.body);
 
   sendResponse(res, {
@@ -63,7 +63,7 @@ const updateCoupon: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const deleteCoupon: RequestHandler = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const result = await CouponService.deleteCoupon(id);
 
   sendResponse(res, {

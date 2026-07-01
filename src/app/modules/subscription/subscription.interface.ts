@@ -2,7 +2,6 @@ import { SubscriptionStatus } from '@prisma/client';
 
 export interface ICreateSubscriptionPayload {
   productVariantId: string;
-  stripeSubscriptionId: string;
   frequency: string;
 }
 

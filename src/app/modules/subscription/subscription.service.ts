@@ -1,15 +1,28 @@
 import AppError from '../../errors/AppError';
 import { QueryBuilder } from '../../utils/QueryBuilder';
 import prisma from '../../utils/prisma';
+import stripe from '../../utils/stripe';
+import config from '../../config';
 import type { ICreateSubscriptionPayload, IUpdateSubscriptionStatusPayload } from './subscription.interface';
 
 const createSubscription = async (userId: string, payload: ICreateSubscriptionPayload) => {
+  const variant = await prisma.productVariant.findUnique({ where: { id: payload.productVariantId } });
+  if (!variant) {
+    throw new AppError(404, 'Product variant not found');
+  }
+
+  // To create a subscription in Stripe, the product variant must have a stripePriceId created beforehand in Stripe dashboard
+  if (!variant.stripePriceId) {
+    throw new AppError(400, 'This product variant is not configured for Stripe subscriptions (missing stripePriceId). Please configure it in the admin panel first.');
+  }
+
   const result = await prisma.subscription.create({
     data: {
       userId,
       productVariantId: payload.productVariantId,
-      stripeSubscriptionId: payload.stripeSubscriptionId,
-      frequency: payload.frequency
+      stripeSubscriptionId: `pending_${Date.now()}`, // Webhook will replace this with real ID
+      frequency: payload.frequency,
+      status: 'PAST_DUE' // Start as PAST_DUE or UNPAID, webhook will mark ACTIVE
     },
     include: {
       productVariant: {
@@ -18,7 +31,26 @@ const createSubscription = async (userId: string, payload: ICreateSubscriptionPa
     }
   });
 
-  return result;
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: [
+      {
+        price: variant.stripePriceId, // Requires actual Price ID from Stripe
+        quantity: 1
+      }
+    ],
+    mode: 'subscription',
+    success_url: `${config.stripe.frontendUrl}/subscription-success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${config.stripe.frontendUrl}/subscription-cancel`,
+    metadata: {
+      subscriptionId: result.id
+    }
+  });
+
+  return {
+    ...result,
+    checkoutUrl: session.url
+  };
 };
 
 const getMySubscriptions = async (userId: string) => {
