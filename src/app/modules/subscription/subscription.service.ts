@@ -131,10 +131,64 @@ const updateSubscriptionStatus = async (id: string, payload: IUpdateSubscription
   return result;
 };
 
+const deleteSubscription = async (id: string, userId: string) => {
+  const result = await prisma.subscription.delete({
+    where: { id, userId }
+  });
+  return result;
+};
+
+const pauseSubscription = async (id: string, userId: string) => {
+  const subscription = await prisma.subscription.findUnique({ where: { id, userId } });
+  if (!subscription) {
+    throw new AppError(404, 'Subscription not found');
+  }
+  if (!subscription.stripeSubscriptionId.startsWith('sub_')) {
+    throw new AppError(400, 'Cannot pause a subscription that is not yet fully active in Stripe');
+  }
+
+  // Tell Stripe to pause collection
+  await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+    pause_collection: { behavior: 'void' }
+  });
+
+  const result = await prisma.subscription.update({
+    where: { id },
+    data: { status: 'PAUSED' }
+  });
+
+  return result;
+};
+
+const resumeSubscription = async (id: string, userId: string) => {
+  const subscription = await prisma.subscription.findUnique({ where: { id, userId } });
+  if (!subscription) {
+    throw new AppError(404, 'Subscription not found');
+  }
+  if (!subscription.stripeSubscriptionId.startsWith('sub_')) {
+    throw new AppError(400, 'Cannot resume a subscription that is not yet fully active in Stripe');
+  }
+
+  // Tell Stripe to resume collection
+  await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+    pause_collection: ''
+  });
+
+  const result = await prisma.subscription.update({
+    where: { id },
+    data: { status: 'ACTIVE' }
+  });
+
+  return result;
+};
+
 export const SubscriptionService = {
   createSubscription,
   getMySubscriptions,
   getAllSubscriptions,
   getSubscriptionById,
-  updateSubscriptionStatus
+  updateSubscriptionStatus,
+  deleteSubscription,
+  pauseSubscription,
+  resumeSubscription
 };

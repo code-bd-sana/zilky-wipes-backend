@@ -113,4 +113,68 @@ export const registerSubscriptionSwagger = (registry: OpenAPIRegistry, bearerAut
       500: Error500
     }
   });
+
+  registry.registerPath({
+    method: 'post',
+    path: '/api/v1/subscriptions/{id}/pause',
+    summary: 'Pause a subscription',
+    description: 'Pause an active subscription in Stripe (Stops billing)',
+    tags: ['Subscriptions'],
+    security: [{ bearerAuth: [] }],
+    request: {
+      params: z.object({
+        id: z.string()
+      })
+    },
+    responses: {
+      200: {
+        description: 'Success',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean(),
+              message: z.string(),
+              data: SubscriptionSchema
+            })
+          }
+        }
+      },
+      401: Error401,
+      403: Error403,
+      404: Error404,
+      500: Error500
+    }
+  });
+
+  registry.registerPath({
+    method: 'post',
+    path: '/api/v1/subscriptions/{id}/resume',
+    summary: 'Resume a subscription',
+    description: 'Resume a paused subscription in Stripe',
+    tags: ['Subscriptions'],
+    security: [{ bearerAuth: [] }],
+    request: {
+      params: z.object({
+        id: z.string()
+      })
+    },
+    responses: {
+      200: {
+        description: 'Success',
+        content: {
+          'application/json': {
+            schema: z.object({
+              success: z.boolean(),
+              message: z.string(),
+              data: SubscriptionSchema
+            })
+          }
+        }
+      },
+      401: Error401,
+      403: Error403,
+      404: Error404,
+      500: Error500
+    }
+  });
 };

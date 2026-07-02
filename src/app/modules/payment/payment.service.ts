@@ -70,11 +70,74 @@ const handleInvoicePaymentSucceeded = async (invoice: Stripe.Invoice) => {
   const stripeSubscriptionId = (invoice as any).subscription as string;
   if (!stripeSubscriptionId) return;
 
-  // Update subscription next billing date or status if needed
-  await prisma.subscription.update({
+  // 1. Update subscription status to ACTIVE
+  const subscription = await prisma.subscription.update({
     where: { stripeSubscriptionId },
     data: {
       status: 'ACTIVE'
+    },
+    include: {
+      productVariant: true
+    }
+  });
+
+  // 2. Prevent duplicate order creation for the initial subscription payment
+  // Stripe sends invoice.payment_succeeded for the very first payment too, 
+  // but we might not want to create a standard order if the first payment 
+  // is handled differently, or maybe we DO want to create an order for the first payment!
+  // Yes, we DO want an order for every successful invoice, so the admin sees it and ships it.
+
+  // 3. Find the user's default address for shipping
+  const defaultAddress = await prisma.address.findFirst({
+    where: { userId: subscription.userId, isDefault: true }
+  });
+
+  if (!defaultAddress) {
+    console.error(`No default address found for user ${subscription.userId}. Cannot create auto-order for subscription ${subscription.id}`);
+    return;
+  }
+
+  // 4. Calculate pricing
+  const quantity = 1; // Subscriptions are typically for 1 unit of the variant
+  const subtotal = subscription.productVariant.price * quantity;
+  
+  const shippingConfig = await prisma.shippingConfig.findFirst();
+  let shippingCost = shippingConfig ? shippingConfig.flatRate : 0;
+  if (shippingConfig && subtotal >= shippingConfig.freeShippingThreshold) {
+    shippingCost = 0;
+  }
+  const total = subtotal + shippingCost;
+
+  // Generate order number
+  const timestamp = Date.now().toString().slice(-6);
+  const random = Math.floor(1000 + Math.random() * 9000).toString();
+  const orderNumber = `#ORD-${timestamp}-${random}`;
+
+  // 5. Create the Order
+  await prisma.order.create({
+    data: {
+      orderNumber,
+      userId: subscription.userId,
+      subtotal,
+      shippingCost,
+      total,
+      status: 'PAID', // It's already paid via the invoice
+      paymentIntentId: (invoice as any).payment_intent as string,
+      shippingFirstName: defaultAddress.firstName,
+      shippingLastName: defaultAddress.lastName,
+      shippingStreetAddress: defaultAddress.streetAddress,
+      shippingCity: defaultAddress.city,
+      shippingState: defaultAddress.state,
+      shippingPostalCode: defaultAddress.postalCode,
+      shippingCountry: defaultAddress.country,
+      shippingPhone: defaultAddress.phone,
+      items: {
+        create: [{
+          productVariantId: subscription.productVariant.id,
+          quantity,
+          price: subscription.productVariant.price
+        }]
+      }
     }
   });
 };

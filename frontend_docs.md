@@ -100,6 +100,20 @@ Subscriptions follow the exact same Stripe Checkout pattern as Orders.
 > [!WARNING]  
 > For a subscription to work, the `ProductVariant` must have a valid `stripePriceId` configured by the admin in the database. Otherwise, the API will throw an error.
 
+### Managing Active Subscriptions
+
+Users can manage their active subscriptions directly from their profile or dashboard. This will interact directly with Stripe to modify their billing schedule.
+
+- **Pause Subscription (Skip next deliveries):** `POST /api/v1/subscriptions/{id}/pause`
+  - Pauses the billing cycle in Stripe. The user will not be charged, and no new orders will be generated until they resume.
+- **Resume Subscription:** `POST /api/v1/subscriptions/{id}/resume`
+  - Resumes a previously paused billing cycle in Stripe.
+
+### Auto-Order Generation (Background Process)
+
+You do **not** need to call any API to generate a new order for recurring subscription deliveries. 
+When a subscription billing cycle hits (e.g., after 15 days), Stripe automatically charges the user's saved card. The backend listens for this successful charge via Webhooks and **automatically creates a new Order** in the database using the user's **Default Shipping Address**. The new order will automatically appear in the user's `GET /api/v1/orders/me` list with the status `PAID`.
+
 ---
 
 ## 5. Coupon Flow

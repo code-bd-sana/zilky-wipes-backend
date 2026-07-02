@@ -24,5 +24,7 @@ router.patch(
   validateRequest(SubscriptionValidation.updateSubscriptionStatus),
   SubscriptionController.updateSubscriptionStatus
 );
+router.post('/:id/pause', auth('USER', 'ADMIN'), SubscriptionController.pauseSubscription);
+router.post('/:id/resume', auth('USER', 'ADMIN'), SubscriptionController.resumeSubscription);
 
 export const SubscriptionRoutes = router;

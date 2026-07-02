@@ -66,10 +66,38 @@ const updateSubscriptionStatus: RequestHandler = catchAsync(async (req, res) => 
   });
 });
 
+const pauseSubscription: RequestHandler = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user!.userId;
+  const result = await SubscriptionService.pauseSubscription(id as string, userId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Subscription paused successfully',
+    data: result
+  });
+});
+
+const resumeSubscription: RequestHandler = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user!.userId;
+  const result = await SubscriptionService.resumeSubscription(id as string, userId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Subscription resumed successfully',
+    data: result
+  });
+});
+
 export const SubscriptionController = {
   createSubscription,
   getMySubscriptions,
   getAllSubscriptions,
   getSubscriptionById,
-  updateSubscriptionStatus
+  updateSubscriptionStatus,
+  pauseSubscription,
+  resumeSubscription
 };
