@@ -45,7 +45,6 @@ const createOrder = async (userId: string, payload: ICreateOrderPayload) => {
     });
   }
 
-  // 3. Fetch shipping config to calculate true shipping cost
   const shippingConfig = await prisma.shippingConfig.findFirst();
   let calculatedShippingCost = shippingConfig ? shippingConfig.flatRate : 0;
 
@@ -53,9 +52,43 @@ const createOrder = async (userId: string, payload: ICreateOrderPayload) => {
     calculatedShippingCost = 0; // Free shipping if subtotal exceeds threshold
   }
 
-  const calculatedTotal = calculatedSubtotal + calculatedShippingCost;
+  // 4. Handle Coupon Calculation
+  let discountAmount = 0;
+  let appliedCouponId: string | undefined = undefined;
 
-  // 4. Use Database Transaction to create order AND deduct stock atomically
+  if (payload.couponCode) {
+    const coupon = await prisma.coupon.findFirst({
+      where: { code: { equals: payload.couponCode, mode: 'insensitive' } }
+    });
+
+    if (coupon && coupon.isActive) {
+      const isValidMinOrder = !coupon.minOrderValue || calculatedSubtotal >= coupon.minOrderValue;
+      const isValidFrom = !coupon.validFrom || new Date(coupon.validFrom) <= new Date();
+      const isValidUntil = !coupon.validUntil || new Date(coupon.validUntil) >= new Date();
+
+      if (isValidMinOrder && isValidFrom && isValidUntil) {
+        if (coupon.discountType === 'PERCENTAGE') {
+          discountAmount = (calculatedSubtotal * coupon.discountValue) / 100;
+          if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
+            discountAmount = coupon.maxDiscount;
+          }
+        } else {
+          discountAmount = coupon.discountValue;
+        }
+
+        // Prevent negative total
+        if (discountAmount > calculatedSubtotal) {
+          discountAmount = calculatedSubtotal;
+        }
+
+        appliedCouponId = coupon.id;
+      }
+    }
+  }
+
+  const calculatedTotal = Math.max(0, calculatedSubtotal + calculatedShippingCost - discountAmount);
+
+  // 5. Use Database Transaction to create order AND deduct stock atomically
   const result = await prisma.$transaction(async (tx) => {
     // Deduct stock for each item
     for (const item of payload.items) {
@@ -83,6 +116,7 @@ const createOrder = async (userId: string, payload: ICreateOrderPayload) => {
         shippingPostalCode: payload.shippingAddress.postalCode,
         shippingCountry: payload.shippingAddress.country,
         shippingPhone: payload.shippingAddress.phone,
+        // We do not have discount/coupon field in order schema yet, so we just save the final calculated values
         items: {
           create: orderItemsData
         }
@@ -95,6 +129,14 @@ const createOrder = async (userId: string, payload: ICreateOrderPayload) => {
         }
       }
     });
+
+    // Increment coupon usage if applied
+    if (appliedCouponId) {
+      await tx.coupon.update({
+        where: { id: appliedCouponId },
+        data: { usedCount: { increment: 1 } }
+      });
+    }
 
     return order;
   });
@@ -125,11 +167,23 @@ const createOrder = async (userId: string, payload: ICreateOrderPayload) => {
     });
   }
 
-  // Assuming result.discountAmount exists if we implement coupon, but keeping it simple based on current schema
+  // Create Stripe Coupon dynamically for this session if there's a discount
+  let stripeCouponId: string | undefined;
+  if (discountAmount > 0) {
+    const stripeCoupon = await stripe.coupons.create({
+      amount_off: Math.round(discountAmount * 100),
+      currency: 'usd',
+      duration: 'once',
+      name: payload.couponCode?.toUpperCase(),
+    });
+    stripeCouponId = stripeCoupon.id;
+  }
+
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: lineItems,
     mode: 'payment',
+    discounts: stripeCouponId ? [{ coupon: stripeCouponId }] : undefined,
     success_url: `${config.stripe.frontendUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${config.stripe.frontendUrl}/payment-cancel`,
     metadata: {

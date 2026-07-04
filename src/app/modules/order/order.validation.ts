@@ -20,7 +20,8 @@ const createOrder = z.object({
     }),
     subtotal: z.number().min(0),
     shippingCost: z.number().min(0),
-    total: z.number().min(0)
+    total: z.number().min(0),
+    couponCode: z.string().optional()
   })
 });
 

@@ -19,6 +19,7 @@ export interface ICreateOrderPayload {
   subtotal: number;
   shippingCost: number;
   total: number;
+  couponCode?: string;
 }
 
 export interface IUpdateOrderStatusPayload {
