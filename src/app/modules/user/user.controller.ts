@@ -33,6 +33,18 @@ const getAllUsers: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const getCustomers: RequestHandler = catchAsync(async (req, res) => {
+  const result = await UserService.getCustomers(req.query);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Customers retrieved successfully.',
+    meta: result.meta,
+    data: result.data
+  });
+});
+
 const changeRole: RequestHandler = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await UserService.changeRole(id as string, req.body);
@@ -48,5 +60,6 @@ const changeRole: RequestHandler = catchAsync(async (req, res) => {
 export const UserController = {
   getMe,
   getAllUsers,
+  getCustomers,
   changeRole
 };
