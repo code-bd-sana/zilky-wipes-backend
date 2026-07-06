@@ -24,6 +24,33 @@ const getMe = async (userId: string) => {
   return user;
 };
 
+const updateProfile = async (userId: string, payload: { firstName?: string; lastName?: string; username?: string; email?: string }) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId }
+  });
+
+  if (!user) {
+    throw new AppError(404, 'User not found.');
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: payload,
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      username: true,
+      email: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true
+    }
+  });
+
+  return updatedUser;
+};
+
 const getAllUsers = async (query: Record<string, unknown>) => {
   const queryBuilder = new QueryBuilder(query)
     .search(['firstName', 'lastName', 'email'])
@@ -199,6 +226,7 @@ const changeRole = async (id: string, payload: IChangeRolePayload) => {
 
 export const UserService = {
   getMe,
+  updateProfile,
   getAllUsers,
   getCustomers,
   changeRole

@@ -21,6 +21,22 @@ const getMe: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const updateProfile: RequestHandler = catchAsync(async (req, res) => {
+  if (!req.user) {
+    throw new AppError(401, 'You are not authorized.');
+  }
+
+  const userId = req.user.userId;
+  const result = await UserService.updateProfile(userId, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User profile updated successfully.',
+    data: result
+  });
+});
+
 const getAllUsers: RequestHandler = catchAsync(async (req, res) => {
   const result = await UserService.getAllUsers(req.query);
 
@@ -59,6 +75,7 @@ const changeRole: RequestHandler = catchAsync(async (req, res) => {
 
 export const UserController = {
   getMe,
+  updateProfile,
   getAllUsers,
   getCustomers,
   changeRole
