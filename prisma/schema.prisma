@@ -254,3 +254,19 @@ model Coupon {
 
   @@map("coupons")
 }
+
+model GeneralFeedback {
+  id                String   @id @default(uuid())
+  firstName         String
+  lastName          String
+  email             String
+  feedbackType      String   // 'website', 'product', 'subscription', 'design'
+  experienceOverall String   // 'excellent', 'good', 'okay', 'needs-improvement'
+  message           String
+  contactConsent    Boolean  @default(false)
+  attachmentUrls    String[] @default([])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("general_feedbacks")
+}
