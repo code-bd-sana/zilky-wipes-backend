@@ -14,4 +14,12 @@ router.post(
 
 router.get('/general', auth('ADMIN'), FeedbackController.getAllGeneralFeedbacks);
 
+router.post(
+  '/market-research',
+  validateRequest(FeedbackValidation.createMarketResearch),
+  FeedbackController.createMarketResearch
+);
+
+router.get('/market-research', auth('ADMIN'), FeedbackController.getAllMarketResearch);
+
 export const FeedbackRoutes = router;

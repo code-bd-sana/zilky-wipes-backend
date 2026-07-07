@@ -19,6 +19,28 @@ const createGeneralFeedback = z.object({
   }),
 });
 
+
+
+const createMarketResearch = z.object({
+  body: z.object({
+    fullName: z.string().optional(),
+    email: z.string().email('Must be a valid email.').optional().or(z.literal('')),
+    ageRange: z.string().optional(),
+    gender: z.string().optional(),
+    navigationEase: z.number({ message: 'Navigation ease is required.' }).min(1).max(10),
+    informationFound: z.string({ message: 'Information found is required.' }),
+    visualAppeal: z.number({ message: 'Visual appeal is required.' }).min(1).max(5),
+    recommendLikelihood: z.number({ message: 'Recommend likelihood is required.' }).min(0).max(10),
+    usefulSections: z.array(z.string()).optional(),
+    improvementSuggest: z.string().optional(),
+    issuesEncountered: z.string().optional(),
+    overallRating: z.number({ message: 'Overall rating is required.' }).min(1).max(5),
+    additionalComments: z.string().optional(),
+    attachmentUrls: z.array(z.string().url()).optional(),
+  }),
+});
+
 export const FeedbackValidation = {
   createGeneralFeedback,
+  createMarketResearch,
 };

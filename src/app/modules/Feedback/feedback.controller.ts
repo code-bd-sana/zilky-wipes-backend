@@ -26,7 +26,32 @@ const getAllGeneralFeedbacks: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const createMarketResearch: RequestHandler = catchAsync(async (req, res) => {
+  const result = await FeedbackService.createMarketResearch(req.body);
+
+  sendResponse(res, {
+    statusCode: 201,
+    success: true,
+    message: 'Market research submitted successfully.',
+    data: result,
+  });
+});
+
+const getAllMarketResearch: RequestHandler = catchAsync(async (req, res) => {
+  const result = await FeedbackService.getAllMarketResearch(req.query);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Market research data retrieved successfully.',
+    meta: result.meta,
+    data: result.data,
+  });
+});
+
 export const FeedbackController = {
   createGeneralFeedback,
   getAllGeneralFeedbacks,
+  createMarketResearch,
+  getAllMarketResearch,
 };

@@ -270,3 +270,26 @@ model GeneralFeedback {
 
   @@map("general_feedbacks")
 }
+
+model MarketResearch {
+  id                  String   @id @default(uuid())
+  fullName            String?
+  email               String?
+  ageRange            String?
+  gender              String?
+  navigationEase      Int      // 1-10
+  informationFound    String   // Radio selection
+  visualAppeal        Int      // 1-5 stars
+  recommendLikelihood Int      // 0-10
+  usefulSections      String[] // Array of selected checkboxes
+  improvementSuggest  String?
+  issuesEncountered   String?
+  overallRating       Int      // 1-5 stars
+  additionalComments  String?
+  attachmentUrls      String[] @default([]) // For file uploads
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("market_research")
+}
