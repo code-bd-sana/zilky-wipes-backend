@@ -112,14 +112,16 @@ const updateProduct = async (id: string, payload: IUpdateProductPayload) => {
               price: v.price!,
               stock: v.stock!,
               subscriptionEligible: v.subscriptionEligible,
-              subscriptionDiscount: v.subscriptionDiscount
+              subscriptionDiscount: v.subscriptionDiscount,
+              stripePriceId: v.stripePriceId
             },
             update: {
               name: v.name,
               price: v.price,
               stock: v.stock,
               subscriptionEligible: v.subscriptionEligible,
-              subscriptionDiscount: v.subscriptionDiscount
+              subscriptionDiscount: v.subscriptionDiscount,
+              stripePriceId: v.stripePriceId
             }
           }))
         }

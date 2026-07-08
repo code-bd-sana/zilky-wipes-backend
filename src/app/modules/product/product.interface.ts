@@ -4,6 +4,7 @@ export interface ICreateProductVariantPayload {
   stock: number;
   subscriptionEligible?: boolean;
   subscriptionDiscount?: number;
+  stripePriceId?: string | null;
 }
 
 export interface ICreateProductPayload {
