@@ -78,7 +78,8 @@ const getAllSubscriptions = async (query: Record<string, unknown>) => {
     include: {
       productVariant: {
         include: { product: true }
-      }
+      },
+      user: true
     }
   });
 
@@ -102,7 +103,8 @@ const getSubscriptionById = async (id: string, userId?: string, role?: string) =
     include: {
       productVariant: {
         include: { product: true }
-      }
+      },
+      user: true
     }
   });
 
