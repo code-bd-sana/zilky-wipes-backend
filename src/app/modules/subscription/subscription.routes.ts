@@ -26,5 +26,6 @@ router.patch(
 );
 router.post('/:id/pause', auth('USER', 'ADMIN'), SubscriptionController.pauseSubscription);
 router.post('/:id/resume', auth('USER', 'ADMIN'), SubscriptionController.resumeSubscription);
+router.delete('/:id', auth('USER', 'ADMIN'), SubscriptionController.deleteSubscription);
 
 export const SubscriptionRoutes = router;

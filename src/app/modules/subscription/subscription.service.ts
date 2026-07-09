@@ -23,7 +23,7 @@ const createSubscription = async (userId: string, payload: ICreateSubscriptionPa
       stripeSubscriptionId: `pending_${Date.now()}`, // Webhook will replace this with real ID
       frequency: payload.frequency,
       quantity: payload.quantity || 1,
-      status: 'PAST_DUE' // Start as PAST_DUE or UNPAID, webhook will mark ACTIVE
+      status: 'UNPAID' // Start as UNPAID, webhook will mark ACTIVE
     },
     include: {
       productVariant: {
@@ -134,12 +134,6 @@ const updateSubscriptionStatus = async (id: string, payload: IUpdateSubscription
   return result;
 };
 
-const deleteSubscription = async (id: string, userId: string) => {
-  const result = await prisma.subscription.delete({
-    where: { id, userId }
-  });
-  return result;
-};
 
 const pauseSubscription = async (id: string, userId: string) => {
   const subscription = await prisma.subscription.findUnique({ where: { id, userId } });
@@ -185,13 +179,40 @@ const resumeSubscription = async (id: string, userId: string) => {
   return result;
 };
 
+const deleteSubscription = async (id: string, userId: string, role: string) => {
+  const subscription = await prisma.subscription.findUnique({
+    where: { id }
+  });
+
+  if (!subscription) {
+    throw new AppError(404, 'Subscription not found');
+  }
+
+  // Only allow deletion if user owns it or is admin
+  if (subscription.userId !== userId && role !== 'ADMIN') {
+    throw new AppError(403, 'You are not authorized to delete this subscription');
+  }
+
+  // To prevent deleting active subscriptions that need cancellation in Stripe,
+  // we only allow deleting if it's UNPAID, PAST_DUE, or CANCELED
+  if (subscription.status === 'ACTIVE' || subscription.status === 'PAUSED') {
+    throw new AppError(400, 'Cannot delete an active or paused subscription. Please cancel it first.');
+  }
+
+  const deleted = await prisma.subscription.delete({
+    where: { id }
+  });
+
+  return deleted;
+};
+
 export const SubscriptionService = {
   createSubscription,
   getMySubscriptions,
   getAllSubscriptions,
   getSubscriptionById,
   updateSubscriptionStatus,
-  deleteSubscription,
   pauseSubscription,
-  resumeSubscription
+  resumeSubscription,
+  deleteSubscription
 };

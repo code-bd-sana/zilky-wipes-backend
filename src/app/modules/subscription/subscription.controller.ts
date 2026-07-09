@@ -92,6 +92,20 @@ const resumeSubscription: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const deleteSubscription: RequestHandler = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user!.userId;
+  const role = req.user!.role;
+  const result = await SubscriptionService.deleteSubscription(id as string, userId, role);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Subscription deleted successfully',
+    data: result
+  });
+});
+
 export const SubscriptionController = {
   createSubscription,
   getMySubscriptions,
@@ -99,5 +113,6 @@ export const SubscriptionController = {
   getSubscriptionById,
   updateSubscriptionStatus,
   pauseSubscription,
-  resumeSubscription
+  resumeSubscription,
+  deleteSubscription
 };
