@@ -22,6 +22,7 @@ const createSubscription = async (userId: string, payload: ICreateSubscriptionPa
       productVariantId: payload.productVariantId,
       stripeSubscriptionId: `pending_${Date.now()}`, // Webhook will replace this with real ID
       frequency: payload.frequency,
+      quantity: payload.quantity || 1,
       status: 'PAST_DUE' // Start as PAST_DUE or UNPAID, webhook will mark ACTIVE
     },
     include: {
@@ -36,7 +37,7 @@ const createSubscription = async (userId: string, payload: ICreateSubscriptionPa
     line_items: [
       {
         price: variant.stripePriceId, // Requires actual Price ID from Stripe
-        quantity: 1
+        quantity: payload.quantity || 1
       }
     ],
     mode: 'subscription',

@@ -218,6 +218,7 @@ model Subscription {
   productVariant       ProductVariant     @relation(fields: [productVariantId], references: [id])
   status               SubscriptionStatus @default(ACTIVE)
   frequency            String             // e.g., "Every 1 Month"
+  quantity             Int                @default(1)
   startingDate         DateTime           @default(now())
   nextBillingDate      DateTime?
   createdAt            DateTime           @default(now())
