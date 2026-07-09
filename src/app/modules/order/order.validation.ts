@@ -6,7 +6,9 @@ const createOrder = z.object({
     items: z.array(z.object({
       productVariantId: z.string(),
       quantity: z.number().int().min(1),
-      price: z.number().min(0)
+      price: z.number().min(0),
+      isSubscription: z.boolean().optional(),
+      frequency: z.string().optional()
     })).min(1),
     shippingAddress: z.object({
       firstName: z.string(),

@@ -35,13 +35,23 @@ const createOrder = async (userId: string, payload: ICreateOrderPayload) => {
     }
 
     // ALWAYS use the price from the database, ignore frontend payload price!
-    const backendPrice = variant.price;
+    let backendPrice = variant.price;
+    
+    // Apply subscription discount if applicable
+    if (item.isSubscription && variant.subscriptionEligible && variant.subscriptionDiscount) {
+      backendPrice = backendPrice * (1 - (variant.subscriptionDiscount / 100));
+    }
+
     calculatedSubtotal += backendPrice * item.quantity;
 
     orderItemsData.push({
       productVariantId: item.productVariantId,
       quantity: item.quantity,
-      price: backendPrice
+      price: backendPrice,
+      ...(item.isSubscription && item.frequency ? {
+        isSubscription: true,
+        frequency: item.frequency
+      } : {})
     });
   }
 

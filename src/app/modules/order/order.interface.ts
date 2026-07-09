@@ -5,6 +5,8 @@ export interface ICreateOrderPayload {
     productVariantId: string;
     quantity: number;
     price: number;
+    isSubscription?: boolean;
+    frequency?: string;
   }[];
   shippingAddress: {
     firstName: string;
