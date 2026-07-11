@@ -13,6 +13,7 @@ import { SubscriptionRoutes } from '../modules/subscription/subscription.routes'
 import { CouponRoutes } from '../modules/coupon/coupon.routes';
 import { PaymentRoutes } from '../modules/payment/payment.routes';
 import { FeedbackRoutes } from '../modules/Feedback/feedback.routes';
+import { ReviewRoutes } from '../modules/Review/review.routes';
 
 const router = Router();
 
@@ -68,6 +69,10 @@ const moduleRoutes = [
   {
     path: '/feedbacks',
     route: FeedbackRoutes
+  },
+  {
+    path: '/reviews',
+    route: ReviewRoutes
   }
 ];
 
