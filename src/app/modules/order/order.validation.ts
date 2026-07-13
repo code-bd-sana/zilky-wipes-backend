@@ -21,9 +21,10 @@ const createOrder = z.object({
       phone: z.string().optional()
     }),
     subtotal: z.number().min(0),
-    shippingCost: z.number().min(0),
+    shippingCost: z.number().min(0).optional(), // optional because backend recalculates
     total: z.number().min(0),
-    couponCode: z.string().optional()
+    couponCode: z.string().optional(),
+    shippingMethodId: z.string().uuid().optional() // New field for dynamic shipping
   })
 });
 
@@ -35,7 +36,8 @@ const updateOrderStatus = z.object({
 
 const updateOrderTracking = z.object({
   body: z.object({
-    trackingNumber: z.string({ message: 'Tracking number is required' })
+    trackingNumber: z.string().optional(),
+    shippingCarrier: z.string().optional()
   })
 });
 

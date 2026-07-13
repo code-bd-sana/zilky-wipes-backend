@@ -14,6 +14,7 @@ import { CouponRoutes } from '../modules/coupon/coupon.routes';
 import { PaymentRoutes } from '../modules/payment/payment.routes';
 import { FeedbackRoutes } from '../modules/Feedback/feedback.routes';
 import { ReviewRoutes } from '../modules/Review/review.routes';
+import { ShippingRoutes } from '../modules/shipping/shipping.routes';
 
 const router = Router();
 
@@ -73,6 +74,10 @@ const moduleRoutes = [
   {
     path: '/reviews',
     route: ReviewRoutes
+  },
+  {
+    path: '/shipping',
+    route: ShippingRoutes
   }
 ];
 

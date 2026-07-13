@@ -63,6 +63,12 @@ enum DiscountType {
   FIXED_AMOUNT
 }
 
+enum ShippingActionType {
+  SET_PRICE
+  FREE_SHIPPING
+  PERCENTAGE_OFF
+}
+
 model Page {
   id          String    @id @default(uuid())
   slug        String    @unique
@@ -139,6 +145,7 @@ model ProductVariant {
   name                 String           // e.g. "Starter Kit", "Refill Pack", "3-Pack"
   price                Float
   stock                Int
+  weight               Float            @default(0)
   subscriptionEligible Boolean          @default(true)
   subscriptionDiscount Float            @default(0.15) // default 15% discount
   stripePriceId        String?          // Stripe Price ID for subscription / checkout billing
@@ -181,6 +188,8 @@ model Order {
   couponId       String?
   coupon         Coupon?     @relation(fields: [couponId], references: [id])
   trackingNumber String?
+  shippingCarrier String?
+  shippingMethodName String?
   paymentIntentId String?    @unique
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -229,14 +238,52 @@ model Subscription {
   @@map("subscriptions")
 }
 
-model ShippingConfig {
-  id                    String   @id @default(uuid())
-  flatRate              Float    @default(5.0)
-  freeShippingThreshold Float    @default(50.0)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+model ShippingMethod {
+  id                    String         @id @default(uuid())
+  name                  String         // e.g., "Standard Shipping"
+  description           String?
+  estimatedDeliveryTime String?        // e.g., "3-5 business days"
+  isActive              Boolean        @default(true)
+  rules                 ShippingRule[]
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
 
-  @@map("shipping_configs")
+  @@map("shipping_methods")
+}
+
+model ShippingRule {
+  id          String         @id @default(uuid())
+  name        String         // e.g., "Free Shipping over $35"
+  methodId    String?
+  method      ShippingMethod? @relation(fields: [methodId], references: [id])
+  isActive    Boolean        @default(true)
+  priority    Int            @default(0) // Higher priority evaluated first
+
+  // Conditions
+  minOrderTotal Float?
+  maxOrderTotal Float?
+  minWeight     Float?
+  maxWeight     Float?
+  minItems      Int?
+  maxItems      Int?
+  
+  // Specific constraints
+  targetCountries String[]   // e.g., ["US", "CA"]
+  targetStates    String[]
+  targetZipCodes  String[]
+  
+  // Promotion / Context constraints
+  isForSubscription Boolean? // If true, only applies to subs
+  requiredCouponId  String?  // Relation to Coupon
+  
+  // Action
+  actionType   ShippingActionType // SET_PRICE, FREE_SHIPPING, PERCENTAGE_OFF
+  actionValue  Float?             // e.g., 5.99 for SET_PRICE, 100 for FREE_SHIPPING
+  
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("shipping_rules")
 }
 
 model Coupon {

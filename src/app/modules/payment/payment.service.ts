@@ -101,11 +101,7 @@ const handleInvoicePaymentSucceeded = async (invoice: Stripe.Invoice) => {
   const quantity = 1; // Subscriptions are typically for 1 unit of the variant
   const subtotal = subscription.productVariant.price * quantity;
   
-  const shippingConfig = await prisma.shippingConfig.findFirst();
-  let shippingCost = shippingConfig ? shippingConfig.flatRate : 0;
-  if (shippingConfig && subtotal >= shippingConfig.freeShippingThreshold) {
-    shippingCost = 0;
-  }
+  let shippingCost = 0; // Default shipping cost for subscriptions, should be calculated via rules engine in future
   const total = subtotal + shippingCost;
 
   // Generate order number

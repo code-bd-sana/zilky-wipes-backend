@@ -19,9 +19,10 @@ export interface ICreateOrderPayload {
     phone?: string;
   };
   subtotal: number;
-  shippingCost: number;
+  shippingCost?: number;
   total: number;
   couponCode?: string;
+  shippingMethodId?: string;
 }
 
 export interface IUpdateOrderStatusPayload {
@@ -29,5 +30,6 @@ export interface IUpdateOrderStatusPayload {
 }
 
 export interface IUpdateOrderTrackingPayload {
-  trackingNumber: string;
+  trackingNumber?: string;
+  shippingCarrier?: string;
 }

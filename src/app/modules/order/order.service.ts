@@ -3,6 +3,7 @@ import { QueryBuilder } from '../../utils/QueryBuilder';
 import prisma from '../../utils/prisma';
 import stripe from '../../utils/stripe';
 import config from '../../config';
+import { ShippingService } from '../shipping/shipping.service';
 import type { ICreateOrderPayload, IUpdateOrderStatusPayload, IUpdateOrderTrackingPayload } from './order.interface';
 
 // Generate a random order number
@@ -21,7 +22,8 @@ const createOrder = async (userId: string, payload: ICreateOrderPayload) => {
   });
 
   let calculatedSubtotal = 0;
-  const orderItemsData: { productVariantId: string; quantity: number; price: number }[] = [];
+  const orderItemsData: { productVariantId: string; quantity: number; price: number; isSubscription?: boolean; frequency?: string }[] = [];
+  const estimateItems: { productVariantId: string; quantity: number; isSubscription?: boolean }[] = [];
 
   // 2. Validate stock and calculate true subtotal
   for (const item of payload.items) {
@@ -44,6 +46,13 @@ const createOrder = async (userId: string, payload: ICreateOrderPayload) => {
 
     calculatedSubtotal += backendPrice * item.quantity;
 
+    const estimateItem = {
+      productVariantId: item.productVariantId,
+      quantity: item.quantity,
+      isSubscription: item.isSubscription
+    };
+    estimateItems.push(estimateItem);
+
     orderItemsData.push({
       productVariantId: item.productVariantId,
       quantity: item.quantity,
@@ -55,11 +64,18 @@ const createOrder = async (userId: string, payload: ICreateOrderPayload) => {
     });
   }
 
-  const shippingConfig = await prisma.shippingConfig.findFirst();
-  let calculatedShippingCost = shippingConfig ? shippingConfig.flatRate : 0;
+  let calculatedShippingCost = 0;
+  let appliedShippingMethodName = 'Standard Shipping';
 
-  if (shippingConfig && calculatedSubtotal >= shippingConfig.freeShippingThreshold) {
-    calculatedShippingCost = 0; // Free shipping if subtotal exceeds threshold
+  if (payload.shippingMethodId) {
+    const shippingInfo = await ShippingService.getCalculateCost(payload.shippingMethodId, {
+      items: estimateItems,
+      country: payload.shippingAddress.country,
+      state: payload.shippingAddress.state,
+      zipCode: payload.shippingAddress.postalCode
+    });
+    calculatedShippingCost = shippingInfo.cost;
+    appliedShippingMethodName = shippingInfo.methodName;
   }
 
   // 4. Handle Coupon Calculation
@@ -118,6 +134,10 @@ const createOrder = async (userId: string, payload: ICreateOrderPayload) => {
         subtotal: calculatedSubtotal,
         shippingCost: calculatedShippingCost,
         total: calculatedTotal,
+        discountAmount,
+        couponId: appliedCouponId,
+        shippingCarrier: null,
+        shippingMethodName: appliedShippingMethodName,
         shippingFirstName: payload.shippingAddress.firstName,
         shippingLastName: payload.shippingAddress.lastName,
         shippingStreetAddress: payload.shippingAddress.streetAddress,
@@ -306,7 +326,10 @@ const updateOrderTracking = async (id: string, payload: IUpdateOrderTrackingPayl
 
   const result = await prisma.order.update({
     where: { id },
-    data: { trackingNumber: payload.trackingNumber }
+    data: { 
+      trackingNumber: payload.trackingNumber,
+      ...(payload.shippingCarrier ? { shippingCarrier: payload.shippingCarrier } : {})
+    }
   });
 
   // Here we would typically send an email with the tracking number
