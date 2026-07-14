@@ -73,10 +73,49 @@ const changeRole: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const updateUserByAdmin: RequestHandler = catchAsync(async (req, res) => {
+  const id = req.params.id as string;
+  const result = await UserService.updateUserByAdmin(id, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User details updated successfully.',
+    data: result
+  });
+});
+
+const updateUserPassword: RequestHandler = catchAsync(async (req, res) => {
+  const id = req.params.id as string;
+  await UserService.updateUserPassword(id, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User password updated successfully.',
+    data: null
+  });
+});
+
+const deleteUser: RequestHandler = catchAsync(async (req, res) => {
+  const id = req.params.id as string;
+  await UserService.deleteUser(id);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User deleted successfully.',
+    data: null
+  });
+});
+
 export const UserController = {
   getMe,
   updateProfile,
   getAllUsers,
   getCustomers,
-  changeRole
+  changeRole,
+  updateUserByAdmin,
+  updateUserPassword,
+  deleteUser
 };

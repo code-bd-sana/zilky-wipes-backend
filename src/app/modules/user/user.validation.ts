@@ -26,7 +26,32 @@ const updateProfile = z.object({
     .strict()
 });
 
+const updateUserByAdmin = z.object({
+  body: z
+    .object({
+      firstName: z.string().min(2, 'First name must be at least 2 characters long.').optional(),
+      lastName: z.string().min(2, 'Last name must be at least 2 characters long.').optional(),
+      email: z
+        .string()
+        .trim()
+        .email('Email must be a valid email address.')
+        .transform((value) => value.toLowerCase())
+        .optional()
+    })
+    .strict()
+});
+
+const updateUserPassword = z.object({
+  body: z
+    .object({
+      password: z.string().min(6, 'Password must be at least 6 characters long.'),
+    })
+    .strict()
+});
+
 export const UserValidation = {
   changeRole,
-  updateProfile
+  updateProfile,
+  updateUserByAdmin,
+  updateUserPassword
 };

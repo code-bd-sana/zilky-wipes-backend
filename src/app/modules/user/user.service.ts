@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import AppError from '../../errors/AppError';
 import { QueryBuilder } from '../../utils/QueryBuilder';
 import prisma from '../../utils/prisma';
@@ -224,10 +225,61 @@ const changeRole = async (id: string, payload: IChangeRolePayload) => {
   return updatedUser;
 };
 
+const updateUserByAdmin = async (id: string, payload: { firstName?: string; lastName?: string; email?: string }) => {
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) {
+    throw new AppError(404, 'User not found.');
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id },
+    data: payload,
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      role: true,
+    }
+  });
+
+  return updatedUser;
+};
+
+const updateUserPassword = async (id: string, payload: { password: string }) => {
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) {
+    throw new AppError(404, 'User not found.');
+  }
+
+  const hashedPassword = await bcrypt.hash(payload.password, 12);
+
+  await prisma.user.update({
+    where: { id },
+    data: { password: hashedPassword }
+  });
+
+  return null;
+};
+
+const deleteUser = async (id: string) => {
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) {
+    throw new AppError(404, 'User not found.');
+  }
+
+  await prisma.user.delete({ where: { id } });
+
+  return null;
+};
+
 export const UserService = {
   getMe,
   updateProfile,
   getAllUsers,
   getCustomers,
-  changeRole
+  changeRole,
+  updateUserByAdmin,
+  updateUserPassword,
+  deleteUser
 };

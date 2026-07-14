@@ -22,5 +22,18 @@ router.patch(
   validateRequest(UserValidation.changeRole),
   UserController.changeRole
 );
+router.patch(
+  '/:id',
+  auth('ADMIN'),
+  validateRequest(UserValidation.updateUserByAdmin),
+  UserController.updateUserByAdmin
+);
+router.patch(
+  '/:id/password',
+  auth('ADMIN'),
+  validateRequest(UserValidation.updateUserPassword),
+  UserController.updateUserPassword
+);
+router.delete('/:id', auth('ADMIN'), UserController.deleteUser);
 
 export const UserRoutes = router;
