@@ -28,13 +28,13 @@ const getAllMethods = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateMethod = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const result = await prisma.shippingMethod.update({ where: { id }, data: req.body });
   sendResponse(res, { statusCode: 200, success: true, message: 'Method updated', data: result });
 });
 
 const deleteMethod = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const result = await prisma.shippingMethod.delete({ where: { id } });
   sendResponse(res, { statusCode: 200, success: true, message: 'Method deleted', data: result });
 });
@@ -51,13 +51,13 @@ const getAllRules = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateRule = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const result = await prisma.shippingRule.update({ where: { id }, data: req.body });
   sendResponse(res, { statusCode: 200, success: true, message: 'Rule updated', data: result });
 });
 
 const deleteRule = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const result = await prisma.shippingRule.delete({ where: { id } });
   sendResponse(res, { statusCode: 200, success: true, message: 'Rule deleted', data: result });
 });

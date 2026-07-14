@@ -7,6 +7,7 @@ const createProductVariant = z.object({
   name: z.string({ message: 'Variant name is required' }),
   price: z.number({ message: 'Price is required' }).min(0),
   stock: z.number({ message: 'Stock is required' }).int().min(0),
+  weight: z.number().min(0).optional(),
   subscriptionEligible: z.boolean().optional(),
   subscriptionDiscount: z.number().min(0).max(100).optional().openapi({ example: 15 }),
   stripePriceId: z.string().nullable().optional().openapi({ example: 'price_1Pqwertyuiop' })
@@ -78,6 +79,7 @@ const updateProduct = z.object({
       name: z.string().optional(),
       price: z.number().min(0).optional(),
       stock: z.number().int().min(0).optional(),
+      weight: z.number().min(0).optional(),
       subscriptionEligible: z.boolean().optional(),
       subscriptionDiscount: z.number().min(0).max(100).optional(),
       stripePriceId: z.string().nullable().optional()
@@ -90,6 +92,7 @@ const updateProductVariant = z.object({
     name: z.string().optional().openapi({ example: 'Single Roll' }),
     price: z.number().min(0).optional().openapi({ example: 12.00 }),
     stock: z.number().int().min(0).optional().openapi({ example: 150 }),
+    weight: z.number().min(0).optional().openapi({ example: 0.5 }),
     subscriptionEligible: z.boolean().optional().openapi({ example: true }),
     subscriptionDiscount: z.number().min(0).max(100).optional().openapi({ example: 15 }),
     stripePriceId: z.string().nullable().optional().openapi({ example: 'price_1Pqwertyuiop' })

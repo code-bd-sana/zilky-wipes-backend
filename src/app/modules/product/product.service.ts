@@ -111,6 +111,7 @@ const updateProduct = async (id: string, payload: IUpdateProductPayload) => {
               name: v.name!,
               price: v.price!,
               stock: v.stock!,
+              weight: v.weight,
               subscriptionEligible: v.subscriptionEligible,
               subscriptionDiscount: v.subscriptionDiscount,
               stripePriceId: v.stripePriceId
@@ -119,6 +120,7 @@ const updateProduct = async (id: string, payload: IUpdateProductPayload) => {
               name: v.name,
               price: v.price,
               stock: v.stock,
+              weight: v.weight,
               subscriptionEligible: v.subscriptionEligible,
               subscriptionDiscount: v.subscriptionDiscount,
               stripePriceId: v.stripePriceId

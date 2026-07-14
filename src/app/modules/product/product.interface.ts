@@ -2,6 +2,7 @@ export interface ICreateProductVariantPayload {
   name: string;
   price: number;
   stock: number;
+  weight?: number;
   subscriptionEligible?: boolean;
   subscriptionDiscount?: number;
   stripePriceId?: string | null;
