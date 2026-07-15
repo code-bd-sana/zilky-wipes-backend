@@ -16,6 +16,8 @@ const handleWebhook = async (signature: string, rawBody: Buffer) => {
     throw new Error(`Webhook Error: ${err.message}`);
   }
 
+  console.log(`[Webhook] Received event: ${event.type} (${event.id})`);
+
   // Handle the event
   switch (event.type) {
     case 'checkout.session.completed': {
@@ -70,11 +72,23 @@ const handleInvoicePaymentSucceeded = async (invoice: Stripe.Invoice) => {
   const stripeSubscriptionId = (invoice as any).subscription as string;
   if (!stripeSubscriptionId) return;
 
-  // 1. Update subscription status to ACTIVE
+  // 1. Fetch subscription from Stripe to get metadata
+  const stripeSubscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+  const localSubscriptionId = stripeSubscription.metadata?.subscriptionId;
+
+  if (!localSubscriptionId) {
+    console.error(`No local subscriptionId found in Stripe subscription ${stripeSubscriptionId} metadata.`);
+    // Try falling back to stripeSubscriptionId in case it was already set by checkout.session.completed
+    const existing = await prisma.subscription.findUnique({ where: { stripeSubscriptionId } });
+    if (!existing) return;
+  }
+
+  // 2. Update subscription status to ACTIVE
   const subscription = await prisma.subscription.update({
-    where: { stripeSubscriptionId },
+    where: localSubscriptionId ? { id: localSubscriptionId } : { stripeSubscriptionId },
     data: {
-      status: 'ACTIVE'
+      status: 'ACTIVE',
+      stripeSubscriptionId: stripeSubscriptionId
     },
     include: {
       productVariant: true

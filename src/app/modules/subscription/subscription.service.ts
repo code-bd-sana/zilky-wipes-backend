@@ -43,6 +43,11 @@ const createSubscription = async (userId: string, payload: ICreateSubscriptionPa
     mode: 'subscription',
     success_url: `${config.stripe.frontendUrl}/subscription-success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${config.stripe.frontendUrl}/subscription-cancel`,
+    subscription_data: {
+      metadata: {
+        subscriptionId: result.id
+      }
+    },
     metadata: {
       subscriptionId: result.id
     }
