@@ -35,4 +35,6 @@ router.patch(
   OrderController.updateOrderTracking
 );
 
+router.delete('/:id', auth('ADMIN'), OrderController.deleteOrder);
+
 export const OrderRoutes = router;

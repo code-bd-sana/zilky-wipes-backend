@@ -337,11 +337,34 @@ const updateOrderTracking = async (id: string, payload: IUpdateOrderTrackingPayl
   return result;
 };
 
+const deleteOrder = async (id: string) => {
+  const order = await prisma.order.findUnique({
+    where: { id }
+  });
+
+  if (!order) {
+    throw new AppError(404, 'Order not found.');
+  }
+
+  // First delete all order items
+  await prisma.orderItem.deleteMany({
+    where: { orderId: id }
+  });
+
+  // Then delete the order
+  await prisma.order.delete({
+    where: { id }
+  });
+
+  return null;
+};
+
 export const OrderService = {
   createOrder,
   getMyOrders,
   getAllOrders,
   getOrderById,
   updateOrderStatus,
-  updateOrderTracking
+  updateOrderTracking,
+  deleteOrder
 };

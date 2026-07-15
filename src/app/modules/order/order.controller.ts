@@ -68,8 +68,8 @@ const updateOrderStatus: RequestHandler = catchAsync(async (req, res) => {
 });
 
 const updateOrderTracking: RequestHandler = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = await OrderService.updateOrderTracking(id as string, req.body);
+  const id = req.params.id as string;
+  const result = await OrderService.updateOrderTracking(id, req.body);
 
   sendResponse(res, {
     statusCode: 200,
@@ -79,11 +79,24 @@ const updateOrderTracking: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const deleteOrder: RequestHandler = catchAsync(async (req, res) => {
+  const id = req.params.id as string;
+  await OrderService.deleteOrder(id);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Order deleted successfully',
+    data: null
+  });
+});
+
 export const OrderController = {
   createOrder,
   getMyOrders,
   getAllOrders,
   getOrderById,
   updateOrderStatus,
-  updateOrderTracking
+  updateOrderTracking,
+  deleteOrder
 };
