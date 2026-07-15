@@ -179,6 +179,31 @@ const resumeSubscription = async (id: string, userId: string) => {
   return result;
 };
 
+const cancelSubscription = async (id: string, userId: string) => {
+  const subscription = await prisma.subscription.findUnique({ where: { id, userId } });
+  if (!subscription) {
+    throw new AppError(404, 'Subscription not found');
+  }
+  
+  if (subscription.stripeSubscriptionId.startsWith('sub_')) {
+    try {
+      await stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
+    } catch (error) {
+      console.error('Error canceling subscription in Stripe:', error);
+      // We might still want to cancel locally if Stripe fails, or throw an error.
+      // We will throw to ensure consistency.
+      throw new AppError(500, 'Failed to cancel subscription in Stripe');
+    }
+  }
+
+  const result = await prisma.subscription.update({
+    where: { id },
+    data: { status: 'CANCELED' }
+  });
+
+  return result;
+};
+
 const deleteSubscription = async (id: string, userId: string, role: string) => {
   const subscription = await prisma.subscription.findUnique({
     where: { id }
@@ -214,5 +239,6 @@ export const SubscriptionService = {
   updateSubscriptionStatus,
   pauseSubscription,
   resumeSubscription,
+  cancelSubscription,
   deleteSubscription
 };
