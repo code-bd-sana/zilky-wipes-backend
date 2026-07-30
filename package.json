@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Production-ready Node.js, Express, TypeScript, PostgreSQL, and Prisma boilerplate.",
   "main": "dist/server.js",
+
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
