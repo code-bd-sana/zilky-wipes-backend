@@ -3,6 +3,15 @@ import { z } from 'zod';
 
 import { registerAuthSwagger } from '../modules/auth/auth.swagger';
 import { registerUserSwagger } from '../modules/user/user.swagger';
+import { registerCategorySwagger } from '../modules/category/category.swagger';
+import { registerTagSwagger } from '../modules/tag/tag.swagger';
+import { registerAddressSwagger } from '../modules/address/address.swagger';
+import { registerProductSwagger } from '../modules/product/product.swagger';
+import { registerOrderSwagger } from '../modules/order/order.swagger';
+import { registerSubscriptionSwagger } from '../modules/subscription/subscription.swagger';
+import { registerUploadSwagger } from '../modules/upload/upload.swagger';
+import { registerCouponSwagger } from '../modules/coupon/coupon.swagger';
+import { registerShippingSwagger } from '../modules/shipping/shipping.swagger';
 
 // Extend Zod to support OpenAPI
 extendZodWithOpenApi(z);
@@ -19,6 +28,15 @@ const bearerAuth = registry.registerComponent('securitySchemes', 'bearerAuth', {
 // Register Module Routes
 registerAuthSwagger(registry, bearerAuth);
 registerUserSwagger(registry, bearerAuth);
+registerCategorySwagger(registry, bearerAuth);
+registerTagSwagger(registry, bearerAuth);
+registerAddressSwagger(registry, bearerAuth);
+registerProductSwagger(registry, bearerAuth);
+registerOrderSwagger(registry, bearerAuth);
+registerSubscriptionSwagger(registry, bearerAuth);
+registerUploadSwagger(registry, bearerAuth);
+registerCouponSwagger(registry, bearerAuth);
+registerShippingSwagger(registry);
 
 export const generateSwaggerDocs = () => {
   const generator = new OpenApiGeneratorV3(registry.definitions);

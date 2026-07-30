@@ -1,0 +1,35 @@
+import { OrderStatus } from '@prisma/client';
+
+export interface ICreateOrderPayload {
+  items: {
+    productVariantId: string;
+    quantity: number;
+    price: number;
+    isSubscription?: boolean;
+    frequency?: string;
+  }[];
+  shippingAddress: {
+    firstName: string;
+    lastName: string;
+    streetAddress: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    phone?: string;
+  };
+  subtotal: number;
+  shippingCost?: number;
+  total: number;
+  couponCode?: string;
+  shippingMethodId?: string;
+}
+
+export interface IUpdateOrderStatusPayload {
+  status: OrderStatus;
+}
+
+export interface IUpdateOrderTrackingPayload {
+  trackingNumber?: string;
+  shippingCarrier?: string;
+}

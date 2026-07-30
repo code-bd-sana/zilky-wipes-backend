@@ -21,6 +21,22 @@ const getMe: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const updateProfile: RequestHandler = catchAsync(async (req, res) => {
+  if (!req.user) {
+    throw new AppError(401, 'You are not authorized.');
+  }
+
+  const userId = req.user.userId;
+  const result = await UserService.updateProfile(userId, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User profile updated successfully.',
+    data: result
+  });
+});
+
 const getAllUsers: RequestHandler = catchAsync(async (req, res) => {
   const result = await UserService.getAllUsers(req.query);
 
@@ -28,6 +44,18 @@ const getAllUsers: RequestHandler = catchAsync(async (req, res) => {
     statusCode: 200,
     success: true,
     message: 'Users retrieved successfully.',
+    meta: result.meta,
+    data: result.data
+  });
+});
+
+const getCustomers: RequestHandler = catchAsync(async (req, res) => {
+  const result = await UserService.getCustomers(req.query);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Customers retrieved successfully.',
     meta: result.meta,
     data: result.data
   });
@@ -45,8 +73,49 @@ const changeRole: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const updateUserByAdmin: RequestHandler = catchAsync(async (req, res) => {
+  const id = req.params.id as string;
+  const result = await UserService.updateUserByAdmin(id, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User details updated successfully.',
+    data: result
+  });
+});
+
+const updateUserPassword: RequestHandler = catchAsync(async (req, res) => {
+  const id = req.params.id as string;
+  await UserService.updateUserPassword(id, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User password updated successfully.',
+    data: null
+  });
+});
+
+const deleteUser: RequestHandler = catchAsync(async (req, res) => {
+  const id = req.params.id as string;
+  await UserService.deleteUser(id);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User deleted successfully.',
+    data: null
+  });
+});
+
 export const UserController = {
   getMe,
+  updateProfile,
   getAllUsers,
-  changeRole
+  getCustomers,
+  changeRole,
+  updateUserByAdmin,
+  updateUserPassword,
+  deleteUser
 };

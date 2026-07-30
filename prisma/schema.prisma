@@ -8,7 +8,9 @@ datasource db {
 
 model User {
   id                   String    @id @default(uuid())
-  name                 String
+  firstName            String
+  lastName             String
+  username             String    @unique
   email                String    @unique
   password             String
   role                 Role      @default(USER)
@@ -16,11 +18,346 @@ model User {
   passwordResetExpires DateTime?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
+  orders               Order[]
+  subscriptions        Subscription[]
+  reviews              Review[]
 
   @@map("users")
+}
+
+model UserProfile {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  profileImage     String?
+  stripeCustomerId String?  @unique
+  phone            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("user_profiles")
 }
 
 enum Role {
   USER
   ADMIN
+}
+
+enum OrderStatus {
+  PROCESSING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  PAUSED
+  UNPAID
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+enum ShippingActionType {
+  SET_PRICE
+  FREE_SHIPPING
+  PERCENTAGE_OFF
+}
+
+model Page {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  title       String
+  description String?
+  sections    Section[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("pages")
+}
+
+model Section {
+  id         String   @id @default(uuid())
+  pageId     String
+  page       Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  sectionKey String
+  content    Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([pageId, sectionKey])
+  @@map("sections")
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  products    Product[] @relation("ProductCategories")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
+model Tag {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  slug     String    @unique
+  products Product[] @relation("ProductTags")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tags")
+}
+
+model Product {
+  id               String   @id @default(uuid())
+  name             String
+  description      String
+  images           String[]
+  accordionDetails Json?
+  isFeatured       Boolean  @default(false)
+
+  categories Category[] @relation("ProductCategories")
+  tags       Tag[]      @relation("ProductTags")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  variants  ProductVariant[]
+  reviews   Review[]
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id                   String           @id @default(uuid())
+  productId            String
+  product              Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name                 String           // e.g. "Starter Kit", "Refill Pack", "3-Pack"
+  price                Float
+  stock                Int
+  weight               Float            @default(0)
+  subscriptionEligible Boolean          @default(true)
+  subscriptionDiscount Float            @default(0.15) // default 15% discount
+  stripePriceId        String?          // Stripe Price ID for subscription / checkout billing
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  orderItems           OrderItem[]
+  subscriptions        Subscription[]
+
+  @@map("product_variants")
+}
+
+model Address {
+  id            String   @id @default(uuid())
+  userId        String?
+  firstName     String
+  lastName      String
+  streetAddress String
+  city          String
+  state         String
+  postalCode    String
+  country       String
+  phone         String?
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("addresses")
+}
+
+model Order {
+  id             String      @id @default(uuid())
+  orderNumber    String      @unique
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status         OrderStatus @default(PROCESSING)
+  subtotal       Float
+  shippingCost   Float
+  total          Float
+  discountAmount Float       @default(0)
+  couponId       String?
+  coupon         Coupon?     @relation(fields: [couponId], references: [id])
+  trackingNumber String?
+  shippingCarrier String?
+  shippingMethodName String?
+  paymentIntentId String?    @unique
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  items          OrderItem[]
+
+  // Address snapshot to persist order details even if user deletes address
+  shippingFirstName     String
+  shippingLastName      String
+  shippingStreetAddress String
+  shippingCity          String
+  shippingState         String
+  shippingPostalCode    String
+  shippingCountry       String
+  shippingPhone         String?
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id               String         @id @default(uuid())
+  orderId          String
+  order            Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productVariantId String
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+  quantity         Int
+  price            Float          // price at the time of purchase
+
+  @@map("order_items")
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  stripeSubscriptionId String             @unique
+  userId               String
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productVariantId     String
+  productVariant       ProductVariant     @relation(fields: [productVariantId], references: [id])
+  status               SubscriptionStatus @default(ACTIVE)
+  frequency            String             // e.g., "Every 1 Month"
+  quantity             Int                @default(1)
+  startingDate         DateTime           @default(now())
+  nextBillingDate      DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@map("subscriptions")
+}
+
+model ShippingMethod {
+  id                    String         @id @default(uuid())
+  name                  String         // e.g., "Standard Shipping"
+  description           String?
+  estimatedDeliveryTime String?        // e.g., "3-5 business days"
+  isActive              Boolean        @default(true)
+  rules                 ShippingRule[]
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  @@map("shipping_methods")
+}
+
+model ShippingRule {
+  id          String         @id @default(uuid())
+  name        String         // e.g., "Free Shipping over $35"
+  methodId    String?
+  method      ShippingMethod? @relation(fields: [methodId], references: [id])
+  isActive    Boolean        @default(true)
+  priority    Int            @default(0) // Higher priority evaluated first
+
+  // Conditions
+  minOrderTotal Float?
+  maxOrderTotal Float?
+  minWeight     Float?
+  maxWeight     Float?
+  minItems      Int?
+  maxItems      Int?
+  
+  // Specific constraints
+  targetCountries String[]   // e.g., ["US", "CA"]
+  targetStates    String[]
+  targetZipCodes  String[]
+  
+  // Promotion / Context constraints
+  isForSubscription Boolean? // If true, only applies to subs
+  requiredCouponId  String?  // Relation to Coupon
+  
+  // Action
+  actionType   ShippingActionType // SET_PRICE, FREE_SHIPPING, PERCENTAGE_OFF
+  actionValue  Float?             // e.g., 5.99 for SET_PRICE, 100 for FREE_SHIPPING
+  
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("shipping_rules")
+}
+
+model Coupon {
+  id            String       @id @default(uuid())
+  code          String       @unique
+  discountType  DiscountType
+  discountValue Float
+  minOrderValue Float?
+  maxDiscount   Float?
+  validFrom     DateTime     @default(now())
+  validUntil    DateTime?
+  isActive      Boolean      @default(true)
+  usageLimit    Int?
+  usedCount     Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  orders        Order[]
+
+  @@map("coupons")
+}
+
+model GeneralFeedback {
+  id                String   @id @default(uuid())
+  firstName         String
+  lastName          String
+  email             String
+  feedbackType      String   // 'website', 'product', 'subscription', 'design'
+  experienceOverall String   // 'excellent', 'good', 'okay', 'needs-improvement'
+  message           String
+  contactConsent    Boolean  @default(false)
+  attachmentUrls    String[] @default([])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("general_feedbacks")
+}
+
+model MarketResearch {
+  id                  String   @id @default(uuid())
+  fullName            String?
+  email               String?
+  ageRange            String?
+  gender              String?
+  navigationEase      Int      // 1-10
+  informationFound    String   // Radio selection
+  visualAppeal        Int      // 1-5 stars
+  recommendLikelihood Int      // 0-10
+  usefulSections      String[] // Array of selected checkboxes
+  improvementSuggest  String?
+  issuesEncountered   String?
+  overallRating       Int      // 1-5 stars
+  additionalComments  String?
+  attachmentUrls      String[] @default([]) // For file uploads
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("market_research")
+}
+
+model Review {
+  id                 String   @id @default(uuid())
+  productId          String
+  product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating             Int      // 1 to 5
+  comment            String?
+  images             String[] @default([])
+  isVerifiedPurchase Boolean  @default(true) // assume true if we enforce purchase in backend
+  
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([productId, userId]) // one review per user per product
+  @@map("reviews")
 }
