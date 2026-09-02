@@ -4,7 +4,7 @@ import auth from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
 import { ProductController } from './product.controller';
 import { ProductValidation } from './product.validation';
-import { upload } from '../../utils/fileUpload';
+import { upload, getFileUrl } from '../../utils/fileUpload';
 
 const router = Router();
 
@@ -26,15 +26,13 @@ const parseProductFormData = (req: Request, res: Response, next: NextFunction) =
 
   const files = req.files as Express.Multer.File[];
   if (files && files.length > 0) {
-    const fileUrls = files.map(file => {
-      const normalizedPath = file.path.replace(/\\/g, '/');
-      return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/${normalizedPath}`;
-    });
+    const fileUrls = files.map(file => getFileUrl(req, file.path));
     req.body.images = req.body.images ? [...req.body.images, ...fileUrls] : fileUrls;
   }
 
   next();
 };
+
 
 router.get('/', ProductController.getAllProducts);
 router.get('/:id', ProductController.getProductById);

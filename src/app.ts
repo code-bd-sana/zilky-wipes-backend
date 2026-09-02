@@ -13,6 +13,7 @@ import sendResponse from './app/utils/sendResponse';
 import { generateSwaggerDocs } from './app/utils/swagger';
 
 const app: Application = express();
+app.set('trust proxy', 1);
 
 const corsOptions: CorsOptions = {
   origin:

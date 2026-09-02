@@ -20,6 +20,7 @@ if (nodeEnv === 'production' && !jwtAccessSecret) {
 const config = {
   nodeEnv,
   port: parseNumber(process.env.PORT, 5000),
+  backendUrl: process.env.BACKEND_URL ?? process.env.SERVER_URL ?? process.env.BASE_URL ?? '',
   databaseUrl: process.env.DATABASE_URL ?? '',
   corsOrigin: process.env.CORS_ORIGIN ?? '*',
   bcryptSaltRounds: parseNumber(process.env.BCRYPT_SALT_ROUNDS, 12),

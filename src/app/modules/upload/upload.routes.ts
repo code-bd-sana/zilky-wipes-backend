@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { upload } from '../../utils/fileUpload';
+import { upload, getFileUrl } from '../../utils/fileUpload';
 import auth from '../../middlewares/auth';
 import sendResponse from '../../utils/sendResponse';
 
@@ -12,10 +12,7 @@ router.post('/:pageName', auth('ADMIN'), upload.array('files', 10), (req, res) =
     return res.status(400).json({ success: false, message: 'No files uploaded' });
   }
 
-  const fileUrls = files.map(file => {
-    const normalizedPath = file.path.replace(/\\/g, '/');
-    return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/${normalizedPath}`;
-  });
+  const fileUrls = files.map(file => getFileUrl(req, file.path));
 
   sendResponse(res, {
     statusCode: 200,
@@ -33,10 +30,7 @@ router.post('/public/:pageName', upload.array('files', 10), (req, res) => {
     return res.status(400).json({ success: false, message: 'No files uploaded' });
   }
 
-  const fileUrls = files.map(file => {
-    const normalizedPath = file.path.replace(/\\/g, '/');
-    return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/${normalizedPath}`;
-  });
+  const fileUrls = files.map(file => getFileUrl(req, file.path));
 
   sendResponse(res, {
     statusCode: 200,
@@ -46,5 +40,6 @@ router.post('/public/:pageName', upload.array('files', 10), (req, res) => {
   });
   return;
 });
+
 
 export const UploadRoutes = router;
