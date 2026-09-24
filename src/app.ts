@@ -15,12 +15,44 @@ import { generateSwaggerDocs } from './app/utils/swagger';
 const app: Application = express();
 app.set('trust proxy', 1);
 
+const rawCorsOrigin = config.corsOrigin;
+const allowedOrigins =
+  rawCorsOrigin === '*'
+    ? '*'
+    : rawCorsOrigin
+        .split(',')
+        .map((origin) => origin.trim().replace(/\/$/, ''))
+        .filter(Boolean);
+
 const corsOptions: CorsOptions = {
-  origin:
-    config.corsOrigin === '*'
-      ? '*'
-      : config.corsOrigin.split(',').map((origin) => origin.trim()),
-  credentials: true
+  origin: (origin, callback) => {
+    // Allow non-browser requests (e.g. mobile apps, curl, server-to-server)
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    // In development or if wildcard '*' is configured, reflect the request origin
+    // so credentials: true is fully compliant with the browser CORS specification
+    if (allowedOrigins === '*' || config.nodeEnv === 'development') {
+      return callback(null, true);
+    }
+
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    if (Array.isArray(allowedOrigins) && allowedOrigins.includes(normalizedOrigin)) {
+      return callback(null, true);
+    }
+
+    const frontendOrigin = config.stripe.frontendUrl?.replace(/\/$/, '');
+    if (frontendOrigin && normalizedOrigin === frontendOrigin) {
+      return callback(null, true);
+    }
+
+    return callback(null, false);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Set-Cookie']
 };
 
 app.use(helmet({

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 
+import config from '../../config';
 import auth from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validateRequest';
 import { AuthController } from './auth.controller';
@@ -10,7 +11,7 @@ const router = Router();
 
 const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 5, // Limit each IP to 5 requests per windowMs
+  limit: config.nodeEnv === 'development' ? 100 : 5, // Relax during development, protect in production
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   message: {
