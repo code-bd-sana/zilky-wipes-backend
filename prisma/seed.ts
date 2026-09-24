@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import config from '../src/app/config';
 import { logger } from '../src/app/utils/logger';
 import prisma from '../src/app/utils/prisma';
+import { seedFaq } from './seed-faq';
 
 async function main() {
   logger.info('Start seeding...');
@@ -65,6 +66,7 @@ async function main() {
     });
   }
   logger.info(`Seeded ${tagsToSeed.length} tags.`);
+  await seedFaq();
   logger.info('Seeding finished.');
 }
 
